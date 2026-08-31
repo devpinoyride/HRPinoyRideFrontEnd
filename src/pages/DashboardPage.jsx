@@ -8,6 +8,7 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [setup, setSetup] = useState('office');
+  const isDev = import.meta.env.DEV;
 
   const load = useCallback(async () => {
     try {
@@ -53,6 +54,21 @@ export default function DashboardPage() {
     }
   }
 
+  async function resetToday() {
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.resetToday();
+      setNotice('Today\'s entry has been reset. You can now clock in again.');
+      await load();
+    } catch (err) {
+      setError(err.message || 'Could not reset today\'s entry.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const today = data?.today || null;
   const week = data?.week || [];
 
@@ -92,12 +108,20 @@ export default function DashboardPage() {
               </button>
             </div>
           ) : null}
+          {status === 'done' && (
+            <span className="clock-done-msg">✓ Already clocked out for today</span>
+          )}
           <button className="btn btn-primary" onClick={clockIn} disabled={busy || status !== 'none'}>
             Clock In
           </button>
           <button className="btn btn-secondary" onClick={clockOut} disabled={busy || status !== 'open'}>
             Clock Out
           </button>
+          {isDev && status === 'done' && (
+            <button className="btn btn-danger" onClick={resetToday} disabled={busy}>
+              Reset Today
+            </button>
+          )}
         </div>
       </section>
 

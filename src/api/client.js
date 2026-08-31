@@ -86,6 +86,7 @@ export const api = {
   clockIn: (workSetup) => request('/api/clock/in', { method: 'POST', body: workSetup ? { workSetup } : undefined }),
   clockOut: () => request('/api/clock/out', { method: 'POST' }),
   clockToday: () => request('/api/clock/today'),
+  resetToday: () => request('/api/clock/reset-today', { method: 'POST' }),
 
   createRequest: (payload) => request('/api/requests', { method: 'POST', body: payload }),
   myRequests: () => request('/api/requests/mine'),

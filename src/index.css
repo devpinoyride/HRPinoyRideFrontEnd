@@ -92,7 +92,8 @@ h2 { font-size: 1.1rem; }
 }
 .clock-info p { margin: 4px 0 0; opacity: 0.95; }
 .clock-date { font-size: 1.15rem; font-weight: 700; }
-.clock-actions { display: flex; gap: 10px; }
+.clock-actions { display: flex; gap: 10px; align-items: center; }
+.clock-done-msg { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
 
 .alert {
   padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
