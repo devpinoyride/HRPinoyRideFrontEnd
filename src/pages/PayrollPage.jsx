@@ -216,6 +216,14 @@ export default function PayrollPage() {
                       <td>Overtime pay ({payslip.computation.overtimeHours} × hourly {peso(payslip.computation.dailyRate / 8)} × 1.25)</td>
                       <td>+ {peso(payslip.computation.overtimePay)}</td>
                     </tr>
+                    <tr>
+                      <td>Office allowance ({peso(100)} × office workdays present)</td>
+                      <td>+ {peso(payslip.computation.officeAllowance)}</td>
+                    </tr>
+                    <tr>
+                      <td>Mobile allowance ({peso(100)} × weeks in period)</td>
+                      <td>+ {peso(payslip.computation.mobileAllowance)}</td>
+                    </tr>
                     <tr className="netpay">
                       <td><strong>NET PAY</strong></td>
                       <td><strong>{peso(payslip.computation.netPay)}</strong></td>
