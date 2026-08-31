@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client.js';
-import { Field, PageHeader, StatusBadge } from '../components/ui.jsx';
+import { Field, PageHeader, StatusBadge, peso } from '../components/ui.jsx';
 
 const ROLES = ['employee', 'approver', 'hr_admin'];
 
@@ -19,7 +19,8 @@ export default function StaffPage() {
     department: '',
     position: '',
     role: 'employee',
-    approverId: ''
+    approverId: '',
+    basicSalary: ''
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -27,7 +28,8 @@ export default function StaffPage() {
     department: '',
     position: '',
     role: 'employee',
-    approverId: ''
+    approverId: '',
+    basicSalary: ''
   });
 
   const load = useCallback(async () => {
@@ -72,11 +74,12 @@ export default function StaffPage() {
         department: createForm.department || null,
         position: createForm.position || null,
         role: createForm.role,
-        approverId: createForm.approverId ? createForm.approverId : null
+        approverId: createForm.approverId ? createForm.approverId : null,
+        basicSalary: createForm.basicSalary === '' ? null : Number(createForm.basicSalary)
       });
       setNotice('Staff member invited. They can now log in with the given credentials.');
       setShowCreate(false);
-      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '' });
+      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '' });
       await load();
     } catch (err) {
       setError(err.message || 'Could not create staff member.');
@@ -91,7 +94,8 @@ export default function StaffPage() {
       department: row.department || '',
       position: row.position || '',
       role: row.role || 'employee',
-      approverId: row.approverId || ''
+      approverId: row.approverId || '',
+      basicSalary: row.basicSalary ?? ''
     });
     setError('');
   }
@@ -106,7 +110,8 @@ export default function StaffPage() {
         department: editForm.department || null,
         position: editForm.position || null,
         role: editForm.role,
-        approverId: editForm.approverId || null
+        approverId: editForm.approverId || null,
+        basicSalary: editForm.basicSalary === '' ? null : Number(editForm.basicSalary)
       });
       setNotice('Staff member updated.');
       setEditingId(null);
@@ -195,6 +200,9 @@ return (
             <Field label="Position">
               <input type="text" value={createForm.position} onChange={(e) => setCreateField('position', e.target.value)} />
             </Field>
+            <Field label="Basic salary (₱ / month)" hint="Used for payslip computation">
+              <input type="number" min="0" step="0.01" value={createForm.basicSalary} onChange={(e) => setCreateField('basicSalary', e.target.value)} />
+            </Field>
             <Field label="Role">
               <select value={createForm.role} onChange={(e) => setCreateField('role', e.target.value)}>
                 {ROLES.map((r) => (
@@ -229,6 +237,9 @@ return (
             </Field>
             <Field label="Position">
               <input type="text" value={editForm.position} onChange={(e) => setEditField('position', e.target.value)} />
+            </Field>
+            <Field label="Basic salary (₱ / month)" hint="Used for payslip computation">
+              <input type="number" min="0" step="0.01" value={editForm.basicSalary} onChange={(e) => setEditField('basicSalary', e.target.value)} />
             </Field>
             <Field label="Role">
               <select value={editForm.role} onChange={(e) => setEditField('role', e.target.value)}>
@@ -267,6 +278,7 @@ return (
                   <th>Email</th>
                   <th>Department</th>
                   <th>Position</th>
+                  <th>Basic salary</th>
                   <th>Role</th>
                   <th>Approver</th>
                   <th>Status</th>
@@ -280,6 +292,7 @@ return (
                     <td>{row.email || '—'}</td>
                     <td>{row.department || '—'}</td>
                     <td>{row.position || '—'}</td>
+                    <td>{row.basicSalary != null ? peso(row.basicSalary) : '—'}</td>
                     <td>{row.role}</td>
                     <td>{row.approverName || '—'}</td>
                     <td><StatusBadge value={row.status} /></td>

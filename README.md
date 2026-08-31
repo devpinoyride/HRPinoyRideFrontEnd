@@ -22,9 +22,19 @@ npm run dev
 ```
 
 The dev server runs on `http://localhost:5173` and proxies `/api` + `/auth` to
-`http://localhost:5000` (start the backend there first, or change the target in
-`vite.config.js`). If your backend is bound to a different port, either adjust the
-proxy target or set `VITE_API_URL` when running the SPA.
+the deployed API at `https://hrpinoyridebackend.onrender.com` (Render). The
+first request after the API sleeps may take up to a minute while the free-tier
+service wakes up.
+
+To use a backend running on your machine instead, point the proxy at it:
+
+```powershell
+$env:API_PROXY_TARGET = 'http://localhost:5000'
+npm run dev
+```
+
+Alternatively, set `VITE_API_URL` to have the browser call the API directly
+(requires the API's CORS policy to allow `http://localhost:5173`).
 
 ## Production build
 
@@ -39,3 +49,5 @@ serve the SPA from the same origin as a reverse proxy in front of the API.
 ## Environment variables
 
 - `VITE_API_URL` — base URL of the `PinoyRideHrApi`. Empty = same origin (dev proxy).
+- `API_PROXY_TARGET` — (config-time, Node env var) target the Vite dev proxy
+  forwards `/api` and `/auth` to. Defaults to `https://hrpinoyridebackend.onrender.com`.

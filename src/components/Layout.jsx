@@ -9,6 +9,7 @@ export default function Layout() {
     { to: '/requests', label: 'My Requests', show: true },
     { to: '/approvals', label: 'Approvals', show: can('approver') },
     { to: '/reports', label: 'Reports', show: can('approver') },
+    { to: '/payroll', label: 'Payroll', show: can('hr_admin') },
     { to: '/staff', label: 'Staff', show: can('hr_admin') }
   ];
 
@@ -16,7 +17,7 @@ export default function Layout() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
-          <span className="brand-dot" />
+          <img src="/logo-icon.png" alt="Pinoy Ride logo" className="brand-logo" />
           Pinoy Ride <strong>HR Portal</strong>
         </div>
         <div className="userbox">

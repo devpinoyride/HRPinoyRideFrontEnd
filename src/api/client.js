@@ -5,16 +5,25 @@ const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 // Backend endpoints are documented in HRPinoyRideBackEnd/README.md.
 
 const TOKEN_KEY = 'pinoyride_auth';
-let token = null;
+
+// localStorage is the single source of truth for the JWT (AuthContext writes
+// it on login and clears it on logout). Reading it at request time — instead
+// of caching it in a module variable synced from an effect — removes the
+// React effect-ordering race: children's effects run before their parents',
+// so DashboardPage's first fetch fired before AuthProvider's setToken() had
+// attached the token, both on page reload and right after login (the fresh
+// token was already in storage, but the module still held the stale one).
+function currentToken() {
+  try {
+    const raw = localStorage.getItem(TOKEN_KEY);
+    return raw ? JSON.parse(raw)?.token || null : null;
+  } catch {
+    /* corrupted storage */
+    return null;
+  }
+}
+
 let onUnauthorized = null;
-
-export function setToken(value) {
-  token = value || null;
-}
-
-export function getToken() {
-  return token;
-}
 
 export function setOnUnauthorized(fn) {
   onUnauthorized = fn;
@@ -30,6 +39,7 @@ function qs(params = {}) {
 }
 
 async function request(path, { method = 'GET', body } = {}) {
+  const token = currentToken();
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -73,7 +83,7 @@ async function request(path, { method = 'GET', body } = {}) {
 export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
 
-  clockIn: () => request('/api/clock/in', { method: 'POST' }),
+  clockIn: (workSetup) => request('/api/clock/in', { method: 'POST', body: workSetup ? { workSetup } : undefined }),
   clockOut: () => request('/api/clock/out', { method: 'POST' }),
   clockToday: () => request('/api/clock/today'),
 
@@ -90,7 +100,11 @@ export const api = {
   deactivateStaff: (id) => request(`/api/staff/${id}/deactivate`, { method: 'POST' }),
 
   reports: (params) => request(`/api/reports${qs(params)}`),
+
+  payrollSummary: (params) => request(`/api/payroll/summary${qs(params)}`),
+  payslip: (params) => request(`/api/payroll/payslip${qs(params)}`),
   downloadReport: async (params) => {
+    const token = currentToken();
     const headers = {};
     if (token) headers.Authorization = `Bearer ${token}`;
     const res = await fetch(API_URL + `/api/reports/export${qs(params)}`, { headers });

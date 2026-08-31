@@ -29,7 +29,7 @@ export default function LoginPage() {
     <div className="login-page">
       <form className="login-card" onSubmit={onSubmit}>
         <div className="login-brand">
-          <span className="brand-dot" />
+          <img src="/logo-full.png" alt="Pinoy Ride Transport Corporation" className="login-logo" />
           <h1>Pinoy Ride <strong>HR Portal</strong></h1>
           <p>Timekeeping sign in</p>
         </div>

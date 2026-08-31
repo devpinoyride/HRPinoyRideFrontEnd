@@ -46,10 +46,9 @@ h2 { font-size: 1.1rem; }
   border-bottom: 1px solid var(--border);
 }
 
-.brand { font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
-.brand-dot {
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--primary); display: inline-block;
+.brand { font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  height: 34px; width: auto; display: block;
 }
 .brand strong { color: var(--primary); }
 
@@ -183,7 +182,49 @@ input:focus, select:focus, textarea:focus {
   padding: 30px;
 }
 .login-brand { text-align: center; margin-bottom: 18px; }
-.login-brand .brand-dot { width: 16px; height: 16px; }
+.login-logo {
+  height: 92px; width: auto; display: block; margin: 0 auto 12px;
+}
+
+/* ---- Payroll ---- */
+.payslip-card { border-top: 4px solid var(--primary); }
+.payslip-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.payslip-head h2 { margin: 0; }
+.payslip-head > div { flex: 1; }
+.payslip-logo { height: 56px; width: auto; }
+.payslip-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px 18px; margin: 14px 0;
+}
+.payslip-grid span {
+  display: block; font-size: .72rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.payslip-computation td:last-child { text-align: right; }
+.payslip-computation .netpay td { border-top: 2px solid var(--primary); font-size: 1.02rem; }
+.payslip-foot { font-size: .78rem; margin-top: 12px; }
+.badge-present { background: #e7f6ec; color: #177245; }
+.badge-absent { background: #fdeaea; color: #b02a2a; }
+.badge-paid_leave { background: #eaf1fd; color: #2456a6; }
+.badge-upcoming { background: #eef0f4; color: #7a8494; }
+.badge-office { background: #e8eefb; color: #33507e; }
+.badge-wfh { background: #f3ecfb; color: #6b3fa0; }
+.setup-toggle {
+  display: inline-flex; border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.setup-toggle button {
+  border: 0; background: transparent; padding: 8px 16px;
+  cursor: pointer; font: inherit; color: var(--muted);
+}
+.setup-toggle button.active { background: var(--primary); color: #fff; }
+
+@media print {
+  .topbar, .navbar, .page-header, .no-print { display: none !important; }
+  body { background: #fff; }
+  .content { padding: 0; }
+  .card { box-shadow: none !important; }
+}
 .login-brand h1 { font-size: 1.35rem; margin-bottom: 2px; }
 .login-brand p { color: var(--muted); margin: 0; font-size: 0.9rem; }
 

@@ -7,6 +7,7 @@ export default function DashboardPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [setup, setSetup] = useState('office');
 
   const load = useCallback(async () => {
     try {
@@ -27,7 +28,7 @@ export default function DashboardPage() {
     setError('');
     setNotice('');
     try {
-      await api.clockIn();
+      await api.clockIn(setup);
       setNotice('You have clocked in. Have a great day!');
       await load();
     } catch (err) {
@@ -70,17 +71,27 @@ export default function DashboardPage() {
           {status === 'none' && <p>You have not clocked in today yet.</p>}
           {status === 'open' && (
             <p>
-              Clocked in at <strong>{fmtISO(today.timeIn)}</strong> — {hoursBetween(today.timeIn, today.timeOut) ?? '—'} hrs so far.
+              Clocked in at <strong>{fmtISO(today.timeIn)}</strong> — {hoursBetween(today.timeIn, today.timeOut) ?? '—'} hrs so far · {today.workSetup === 'wfh' ? 'WFH' : 'Office'}.
             </p>
           )}
           {status === 'done' && (
             <p>
-              {fmtISO(today.timeIn)} → {fmtISO(today.timeOut)} · <strong>{hoursBetween(today.timeIn, today.timeOut)} hrs</strong>
+              {fmtISO(today.timeIn)} → {fmtISO(today.timeOut)} · <strong>{hoursBetween(today.timeIn, today.timeOut)} hrs</strong> · {today.workSetup === 'wfh' ? 'WFH' : 'Office'}
             </p>
           )}
         </div>
 
         <div className="clock-actions">
+          {status === 'none' ? (
+            <div className="setup-toggle" role="group" aria-label="Work setup for today">
+              <button type="button" className={setup === 'office' ? 'active' : ''} onClick={() => setSetup('office')}>
+                Office
+              </button>
+              <button type="button" className={setup === 'wfh' ? 'active' : ''} onClick={() => setSetup('wfh')}>
+                WFH
+              </button>
+            </div>
+          ) : null}
           <button className="btn btn-primary" onClick={clockIn} disabled={busy || status !== 'none'}>
             Clock In
           </button>
@@ -105,6 +116,7 @@ export default function DashboardPage() {
                   <th>Hours</th>
                   <th>Source</th>
                   <th>Status</th>
+                  <th>Setup</th>
                 </tr>
               </thead>
               <tbody>
@@ -116,6 +128,7 @@ export default function DashboardPage() {
                     <td>{hoursBetween(e.timeIn, e.timeOut) ?? '—'}</td>
                     <td><StatusBadge value={e.source} /></td>
                     <td><StatusBadge value={e.status} /></td>
+                    <td>{e.workSetup === 'wfh' ? 'WFH' : 'Office'}</td>
                   </tr>
                 ))}
               </tbody>

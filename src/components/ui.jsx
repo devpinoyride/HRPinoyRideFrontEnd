@@ -31,6 +31,11 @@ export function hoursBetween(timeIn, timeOut) {
   return Math.round(((b - a) / 3.6e6) * 100) / 100;
 }
 
+export function peso(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(Number(value));
+}
+
 export function StatusBadge({ value }) {
   const v = value || '—';
   return <span className={`badge badge-${String(v).toLowerCase()}`}>{v}</span>;

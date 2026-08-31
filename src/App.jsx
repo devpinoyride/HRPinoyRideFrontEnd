@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import RequestsPage from './pages/RequestsPage.jsx';
 import ApprovalsPage from './pages/ApprovalsPage.jsx';
 import ReportsPage from './pages/ReportsPage.jsx';
+import PayrollPage from './pages/PayrollPage.jsx';
 import StaffPage from './pages/StaffPage.jsx';
 
 function RequireAuth({ children }) {
@@ -51,6 +52,14 @@ export default function App() {
           element={
             <RequireRole level="approver">
               <ReportsPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="payroll"
+          element={
+            <RequireRole level="hr_admin">
+              <PayrollPage />
             </RequireRole>
           }
         />

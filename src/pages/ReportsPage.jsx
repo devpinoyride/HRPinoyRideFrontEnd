@@ -136,6 +136,7 @@ export default function ReportsPage() {
                       <th>Hours</th>
                       <th>Source</th>
                       <th>Status</th>
+                      <th>Setup</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -148,6 +149,7 @@ export default function ReportsPage() {
                         <td>{hoursBetween(e.timeIn, e.timeOut) ?? '—'}</td>
                         <td><StatusBadge value={e.source} /></td>
                         <td><StatusBadge value={e.status} /></td>
+                        <td>{e.workSetup === 'wfh' ? 'WFH' : e.workSetup ? 'Office' : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
