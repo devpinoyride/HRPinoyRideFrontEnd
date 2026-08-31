@@ -94,6 +94,8 @@ h2 { font-size: 1.1rem; }
 .clock-date { font-size: 1.15rem; font-weight: 700; }
 .clock-actions { display: flex; gap: 10px; align-items: center; }
 .clock-done-msg { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
+.clock-grace-msg { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
+.confirm-actions { display: flex; gap: 8px; margin-top: 10px; }
 
 .alert {
   padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
@@ -101,6 +103,8 @@ h2 { font-size: 1.1rem; }
 }
 .alert-error { background: var(--danger-bg); color: var(--danger); }
 .alert-success { background: var(--success-bg); color: #166534; }
+.alert-warning { background: var(--warning-bg); color: #92400e; }
+.clock-grace-msg { font-size: 0.85rem; opacity: 0.9; font-weight: 500; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .stat-card {
@@ -123,6 +127,8 @@ h2 { font-size: 1.1rem; }
 .btn-secondary:hover:not(:disabled) { background: #f8fafc; }
 .btn-success { background: var(--success); color: #fff; }
 .btn-danger { background: var(--danger); color: #fff; }
+.btn-warning { background: #d97706; color: #fff; }
+.btn-warning:hover:not(:disabled) { background: #b45309; }
 .btn-ghost { background: transparent; color: var(--muted); }
 .btn-ghost:hover:not(:disabled) { background: #f1f5f9; }
 .btn-sm { padding: 5px 10px; font-size: 0.82rem; }

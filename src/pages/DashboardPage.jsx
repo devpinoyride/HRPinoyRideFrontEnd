@@ -1,13 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Field, PageHeader, StatusBadge, fmtISO, hoursBetween, fmtDate } from '../components/ui.jsx';
 
+const GRACE_PERIOD_MINUTES = 5;
+
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [setup, setSetup] = useState('office');
+  const [confirming, setConfirming] = useState(false);
   const isDev = import.meta.env.DEV;
 
   const load = useCallback(async () => {
@@ -39,7 +44,12 @@ export default function DashboardPage() {
     }
   }
 
-  async function clockOut() {
+  function askClockOut() {
+    setConfirming(true);
+  }
+
+  async function confirmClockOut() {
+    setConfirming(false);
     setBusy(true);
     setError('');
     setNotice('');
@@ -49,6 +59,21 @@ export default function DashboardPage() {
       await load();
     } catch (err) {
       setError(err.message || 'Could not clock out.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function undoClockOut() {
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.undoClockOut();
+      setNotice('Clock-out undone. You are now clocked in again.');
+      await load();
+    } catch (err) {
+      setError(err.message || 'Could not undo clock out.');
     } finally {
       setBusy(false);
     }
@@ -74,12 +99,28 @@ export default function DashboardPage() {
 
   const status = !today ? 'none' : today.timeOut ? 'done' : 'open';
 
+  const gracePeriodActive = (() => {
+    if (status !== 'done' || !today?.timeOut) return false;
+    const elapsed = (Date.now() - new Date(today.timeOut).getTime()) / 60000;
+    return elapsed >= 0 && elapsed <= GRACE_PERIOD_MINUTES;
+  })();
+
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Time in / time out and your current week." />
 
       {error ? <div className="alert alert-error">{error}</div> : null}
       {notice ? <div className="alert alert-success">{notice}</div> : null}
+
+      {confirming && (
+        <div className="alert alert-warning">
+          <strong>Clock out now?</strong> This can't be undone after {GRACE_PERIOD_MINUTES} minutes without submitting a correction request.
+          <div className="confirm-actions">
+            <button className="btn btn-primary" onClick={confirmClockOut} disabled={busy}>Yes, clock out</button>
+            <button className="btn btn-secondary" onClick={() => setConfirming(false)} disabled={busy}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       <section className="clock-card">
         <div className="clock-info">
@@ -108,15 +149,33 @@ export default function DashboardPage() {
               </button>
             </div>
           ) : null}
-          {status === 'done' && (
+          {status === 'done' && !gracePeriodActive && (
             <span className="clock-done-msg">✓ Already clocked out for today</span>
+          )}
+          {gracePeriodActive && (
+            <span className="clock-grace-msg">Within {GRACE_PERIOD_MINUTES}-min grace period</span>
           )}
           <button className="btn btn-primary" onClick={clockIn} disabled={busy || status !== 'none'}>
             Clock In
           </button>
-          <button className="btn btn-secondary" onClick={clockOut} disabled={busy || status !== 'open'}>
-            Clock Out
-          </button>
+          {status === 'open' && !confirming && (
+            <button className="btn btn-secondary" onClick={askClockOut} disabled={busy}>
+              Clock Out
+            </button>
+          )}
+          {gracePeriodActive && (
+            <button className="btn btn-warning" onClick={undoClockOut} disabled={busy}>
+              Undo Clock Out
+            </button>
+          )}
+          {status === 'done' && !gracePeriodActive && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => navigate('/requests', { state: { prefill: { requestType: 'adjustment', workDate: today?.workDate || '' } } })}
+            >
+              Request Correction
+            </button>
+          )}
           {isDev && status === 'done' && (
             <button className="btn btn-danger" onClick={resetToday} disabled={busy}>
               Reset Today

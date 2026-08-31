@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Field, PageHeader, StatusBadge, fmtDate, fmtTime } from '../components/ui.jsx';
 
@@ -10,16 +11,19 @@ function todayStr() {
 }
 
 export default function RequestsPage() {
+  const location = useLocation();
+  const prefill = location.state?.prefill || null;
+
   const [mine, setMine] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
   const [form, setForm] = useState({
-    workDate: todayStr(),
+    workDate: prefill?.workDate || todayStr(),
     requestedTimeIn: '09:00',
     requestedTimeOut: '18:00',
-    requestType: 'adjustment',
+    requestType: prefill?.requestType || 'adjustment',
     reason: ''
   });
 
