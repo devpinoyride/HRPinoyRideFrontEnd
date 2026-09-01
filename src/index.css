@@ -89,6 +89,14 @@ h2 { font-size: 1.1rem; }
 }
 .nav-link:hover { color: var(--pr-orange); }
 .nav-link.active { background: var(--pr-orange); color: var(--pr-dark); font-weight: 600; }
+/* Pending-count badge on a nav link (e.g. Approvals). */
+.nav-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px;
+  border-radius: 999px; background: #dc2626; color: #fff;
+  font-size: 0.7rem; font-weight: 700; line-height: 1; vertical-align: middle;
+}
+.nav-link.active .nav-badge { background: var(--pr-dark); color: #fff; }
 
 .content { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
 
