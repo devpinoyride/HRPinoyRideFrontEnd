@@ -34,7 +34,9 @@ export default function StaffPage() {
     mobileIncentiveEnabled: true,
     mobileIncentiveAmount: '100',
     workDays: 'mon_fri',
-    fixedSalary: false
+    fixedSalary: false,
+    schedTimeIn: '09:00',
+    schedTimeOut: '17:00'
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -52,7 +54,9 @@ export default function StaffPage() {
     mobileIncentiveEnabled: true,
     mobileIncentiveAmount: '100',
     workDays: 'mon_fri',
-    fixedSalary: false
+    fixedSalary: false,
+    schedTimeIn: '09:00',
+    schedTimeOut: '17:00'
   });
 
   const load = useCallback(async () => {
@@ -121,12 +125,14 @@ export default function StaffPage() {
         mobileIncentiveEnabled: createForm.mobileIncentiveEnabled,
         mobileIncentiveAmount: createForm.mobileIncentiveAmount === '' ? 0 : Number(createForm.mobileIncentiveAmount),
         workDays: createForm.workDays,
-        fixedSalary: createForm.salaryMode === 'basic' ? createForm.fixedSalary : false
+        fixedSalary: createForm.salaryMode === 'basic' ? createForm.fixedSalary : false,
+        schedTimeIn: createForm.schedTimeIn,
+        schedTimeOut: createForm.schedTimeOut
       });
       setInvited({ name: invitedName, email: invitedEmail, password: invitedPassword });
       setCopied('');
       setShowCreate(false);
-      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100', workDays: 'mon_fri', fixedSalary: false });
+      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100', workDays: 'mon_fri', fixedSalary: false, schedTimeIn: '09:00', schedTimeOut: '17:00' });
       await load();
     } catch (err) {
       setError(err.message || 'Could not create staff member.');
@@ -152,7 +158,9 @@ export default function StaffPage() {
       mobileIncentiveEnabled: row.mobileIncentiveEnabled ?? true,
       mobileIncentiveAmount: row.mobileIncentiveAmount ?? '100',
       workDays: row.workDays || 'mon_fri',
-      fixedSalary: row.fixedSalary ?? false
+      fixedSalary: row.fixedSalary ?? false,
+      schedTimeIn: (row.schedTimeIn || '09:00:00').slice(0, 5),
+      schedTimeOut: (row.schedTimeOut || '17:00:00').slice(0, 5)
     });
     setError('');
   }
@@ -176,7 +184,9 @@ export default function StaffPage() {
         mobileIncentiveEnabled: editForm.mobileIncentiveEnabled,
         mobileIncentiveAmount: editForm.mobileIncentiveAmount === '' ? 0 : Number(editForm.mobileIncentiveAmount),
         workDays: editForm.workDays,
-        fixedSalary: editForm.salaryMode === 'basic' ? editForm.fixedSalary : false
+        fixedSalary: editForm.salaryMode === 'basic' ? editForm.fixedSalary : false,
+        schedTimeIn: editForm.schedTimeIn,
+        schedTimeOut: editForm.schedTimeOut
       });
       setNotice('Staff member updated.');
       setEditingId(null);
@@ -343,6 +353,12 @@ return (
                     <option value="mon_sat">Monday – Saturday</option>
                   </select>
                 </Field>
+                <Field label="Schedule time in" hint="Late after this + 15-min grace">
+                  <input type="time" value={createForm.schedTimeIn} onChange={(e) => setCreateField('schedTimeIn', e.target.value)} />
+                </Field>
+                <Field label="Schedule time out" hint="Leaving before this is undertime (no grace)">
+                  <input type="time" value={createForm.schedTimeOut} onChange={(e) => setCreateField('schedTimeOut', e.target.value)} />
+                </Field>
                 <Field
                   label="Basic salary (₱ / month)"
                   hint={createForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
@@ -454,6 +470,12 @@ return (
                     <option value="mon_fri">Monday – Friday</option>
                     <option value="mon_sat">Monday – Saturday</option>
                   </select>
+                </Field>
+                <Field label="Schedule time in" hint="Late after this + 15-min grace">
+                  <input type="time" value={editForm.schedTimeIn} onChange={(e) => setEditField('schedTimeIn', e.target.value)} />
+                </Field>
+                <Field label="Schedule time out" hint="Leaving before this is undertime (no grace)">
+                  <input type="time" value={editForm.schedTimeOut} onChange={(e) => setEditField('schedTimeOut', e.target.value)} />
                 </Field>
                 <Field
                   label="Basic salary (₱ / month)"

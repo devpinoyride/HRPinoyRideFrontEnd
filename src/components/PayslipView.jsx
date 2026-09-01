@@ -137,6 +137,15 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <td>Sunday pay ({peso(c.dailyRate)} × {c.sundayDays} approved Sunday{c.sundayDays === 1 ? '' : 's'})</td>
                       <td>+ {peso(c.sundayPay)}</td>
                     </tr>
+                    <tr>
+                      <td>
+                        Tardiness / undertime
+                        {(c.lateMinutes || c.earlyOutMinutes)
+                          ? ` (${c.lateMinutes} min late + ${c.earlyOutMinutes} min undertime × ${peso(c.minuteRate)}/min)`
+                          : ' (none)'}
+                      </td>
+                      <td>− {peso(c.tardinessDeduction)}</td>
+                    </tr>
                     <tr className="netpay">
                       <td><strong>NET PAY</strong></td>
                       <td><strong>{peso(c.netPay)}</strong></td>
@@ -183,6 +192,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <th>Time out</th>
                       <th>Hours</th>
                       <th>Setup</th>
+                      <th>Flags</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -195,6 +205,11 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         <td>{fmtISO(d.timeOut)}</td>
                         <td>{d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}</td>
                         <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
+                        <td>
+                          {d.lateMinutes ? <span className="badge badge-absent" title={`${d.lateMinutes} min late`}>Late {d.lateMinutes}m</span> : null}
+                          {d.earlyOutMinutes ? <span className="badge badge-absent" title={`${d.earlyOutMinutes} min undertime`}>Early {d.earlyOutMinutes}m</span> : null}
+                          {(!d.lateMinutes && !d.earlyOutMinutes && d.status === 'present') ? <span className="badge badge-present">On time</span> : null}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
