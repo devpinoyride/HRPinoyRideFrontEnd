@@ -51,15 +51,14 @@ h2 { font-size: 1.1rem; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 28px;
+  padding: 6px 24px;
   background: var(--pr-dark);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.brand { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #fff; }
+.brand { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; }
 .brand-logo {
-  height: 32px; width: auto; display: block;
+  height: 26px; width: auto; display: block;
   /* Melt the logo's dark background into the dark navbar. */
   mix-blend-mode: screen;
 }
@@ -76,15 +75,16 @@ h2 { font-size: 1.1rem; }
 .role-approver { background: rgba(245, 166, 35, 0.25); color: var(--pr-orange); }
 
 .navbar {
-  display: flex; gap: 4px; padding: 8px 24px;
+  display: flex; gap: 4px; padding: 4px 20px;
   background: var(--pr-dark-secondary);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   flex-wrap: wrap;
   position: sticky; top: 0; z-index: 1020;
 }
 .nav-link {
-  padding: 8px 16px; border-radius: var(--pill); color: #fff;
-  text-decoration: none; font-weight: 500; font-size: 0.9rem;
+  padding: 6px 14px; border-radius: var(--pill); color: #fff;
+  text-decoration: none; font-weight: 500; font-size: 0.88rem;
   transition: all 0.15s ease;
 }
 .nav-link:hover { color: var(--pr-orange); }
@@ -199,6 +199,14 @@ input:disabled, select:disabled, textarea:disabled {
   font-size: 0.9rem; white-space: nowrap;
 }
 .table th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+/* Compact, dense table that fits many numeric columns without scrolling. */
+.table-compact { table-layout: auto; }
+.table-compact th, .table-compact td {
+  padding: 7px 8px; font-size: 0.82rem;
+}
+.table-compact th { font-size: 0.68rem; letter-spacing: 0.02em; }
+.table-compact td.num, .table-compact th.num { text-align: right; }
 .table tbody tr:hover { background: #f8fafc; }
 .row-inactive { opacity: 0.55; }
 .row-actions { display: flex; gap: 6px; }

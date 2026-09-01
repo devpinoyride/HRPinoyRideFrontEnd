@@ -234,51 +234,45 @@ export default function PayrollPage() {
           <p className="muted">No staff found.</p>
         ) : (
           <div className="table-wrap">
-            <table className="table">
+            <table className="table table-compact">
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Role</th>
-                  <th>Salary mode</th>
-                  <th>Basic salary</th>
-                  <th>Daily rate</th>
-                  <th>Workdays</th>
-                  <th>Worked</th>
-                  <th>Absent</th>
-                  <th>OT hrs</th>
-                  <th>Deduction</th>
-                  <th>OT pay</th>
-                  <th>Net pay</th>
-                  <th>Actions</th>
+                  <th>Mode</th>
+                  <th className="num">Basic</th>
+                  <th className="num">Days</th>
+                  <th className="num">Absent</th>
+                  <th className="num">Deduction</th>
+                  <th className="num">OT pay</th>
+                  <th className="num">Net pay</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.staffId} className={r.status === 'inactive' ? 'row-inactive' : ''}>
                     <td>{r.fullName}</td>
-                    <td>{r.role}</td>
                     <td>
                       {r.salaryMode === 'daily' ? (
                         <span className="badge badge-orange">Daily</span>
+                      ) : r.fixedSalary ? (
+                        <span className="badge badge-orange">Fixed</span>
                       ) : (
                         <span className="badge">Monthly</span>
                       )}
                     </td>
-                    <td>{r.basicSalary != null ? peso(r.basicSalary) : '—'}</td>
-                    <td>{r.dailyRate != null ? peso(r.dailyRate) : '—'}</td>
-                    <td>{r.workdays}</td>
-                    <td>{r.workedDays}</td>
-                    <td>{r.absentDays}</td>
-                    <td>{r.overtimeHours || 0}</td>
-                    <td>{r.absenceDeduction != null ? peso(r.absenceDeduction) : '—'}</td>
-                    <td>{r.overtimePay != null ? peso(r.overtimePay) : '—'}</td>
-                    <td><strong>{r.netPay != null ? peso(r.netPay) : '—'}</strong></td>
+                    <td className="num">{r.basicSalary != null ? peso(r.basicSalary) : '—'}</td>
+                    <td className="num">{r.workedDays}/{r.workdays}</td>
+                    <td className="num">{r.absentDays}</td>
+                    <td className="num">{r.absenceDeduction != null ? peso(r.absenceDeduction) : '—'}</td>
+                    <td className="num">{r.overtimePay != null ? peso(r.overtimePay) : '—'}</td>
+                    <td className="num"><strong>{r.netPay != null ? peso(r.netPay) : '—'}</strong></td>
                     <td>
                       <button
                         className="btn btn-secondary btn-sm"
                         onClick={() => openPayslip(r.staffId)}
                       >
-                        View payslip
+                        View
                       </button>
                     </td>
                   </tr>

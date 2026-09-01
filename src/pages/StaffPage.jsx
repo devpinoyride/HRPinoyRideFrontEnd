@@ -31,7 +31,8 @@ export default function StaffPage() {
     officeIncentiveAmount: '100',
     mobileIncentiveEnabled: true,
     mobileIncentiveAmount: '100',
-    workDays: 'mon_fri'
+    workDays: 'mon_fri',
+    fixedSalary: false
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -48,7 +49,8 @@ export default function StaffPage() {
     officeIncentiveAmount: '100',
     mobileIncentiveEnabled: true,
     mobileIncentiveAmount: '100',
-    workDays: 'mon_fri'
+    workDays: 'mon_fri',
+    fixedSalary: false
   });
 
   const load = useCallback(async () => {
@@ -116,12 +118,13 @@ export default function StaffPage() {
         officeIncentiveAmount: createForm.officeIncentiveAmount === '' ? 0 : Number(createForm.officeIncentiveAmount),
         mobileIncentiveEnabled: createForm.mobileIncentiveEnabled,
         mobileIncentiveAmount: createForm.mobileIncentiveAmount === '' ? 0 : Number(createForm.mobileIncentiveAmount),
-        workDays: createForm.workDays
+        workDays: createForm.workDays,
+        fixedSalary: createForm.salaryMode === 'basic' ? createForm.fixedSalary : false
       });
       setInvited({ name: invitedName, email: invitedEmail, password: invitedPassword });
       setCopied('');
       setShowCreate(false);
-      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100', workDays: 'mon_fri' });
+      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100', workDays: 'mon_fri', fixedSalary: false });
       await load();
     } catch (err) {
       setError(err.message || 'Could not create staff member.');
@@ -145,7 +148,8 @@ export default function StaffPage() {
       officeIncentiveAmount: row.officeIncentiveAmount ?? '100',
       mobileIncentiveEnabled: row.mobileIncentiveEnabled ?? true,
       mobileIncentiveAmount: row.mobileIncentiveAmount ?? '100',
-      workDays: row.workDays || 'mon_fri'
+      workDays: row.workDays || 'mon_fri',
+      fixedSalary: row.fixedSalary ?? false
     });
     setError('');
   }
@@ -168,7 +172,8 @@ export default function StaffPage() {
         officeIncentiveAmount: editForm.officeIncentiveAmount === '' ? 0 : Number(editForm.officeIncentiveAmount),
         mobileIncentiveEnabled: editForm.mobileIncentiveEnabled,
         mobileIncentiveAmount: editForm.mobileIncentiveAmount === '' ? 0 : Number(editForm.mobileIncentiveAmount),
-        workDays: editForm.workDays
+        workDays: editForm.workDays,
+        fixedSalary: editForm.salaryMode === 'basic' ? editForm.fixedSalary : false
       });
       setNotice('Staff member updated.');
       setEditingId(null);
@@ -312,6 +317,12 @@ return (
             >
               <input type="number" min="0" step="0.01" value={createForm.basicSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('basicSalary', e.target.value)} />
             </Field>
+            <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
+              <label className="incentive-toggle">
+                <input type="checkbox" checked={createForm.fixedSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('fixedSalary', e.target.checked)} />
+                <span>Ignore attendance for pay</span>
+              </label>
+            </Field>
             <Field
               label="Daily rate (₱ / day)"
               hint={createForm.salaryMode === 'daily' ? 'Paid only for days the staff actually works' : 'Not used in Basic mode'}
@@ -397,6 +408,12 @@ return (
               hint={editForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
             >
               <input type="number" min="0" step="0.01" value={editForm.basicSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('basicSalary', e.target.value)} />
+            </Field>
+            <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
+              <label className="incentive-toggle">
+                <input type="checkbox" checked={editForm.fixedSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('fixedSalary', e.target.checked)} />
+                <span>Ignore attendance for pay</span>
+              </label>
             </Field>
             <Field
               label="Daily rate (₱ / day)"

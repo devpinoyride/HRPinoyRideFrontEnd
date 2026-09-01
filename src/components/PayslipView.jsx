@@ -88,7 +88,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
               {c ? (
                 <table className="table payslip-computation">
                   <tbody>
-                    <tr><td>Salary mode</td><td>{c.salaryMode === 'daily' ? 'Daily (paid per day worked)' : 'Monthly (semi-monthly)'}</td></tr>
+                    <tr><td>Salary mode</td><td>{c.salaryMode === 'daily' ? 'Daily (paid per day worked)' : (c.fixedSalary ? 'Monthly · Fixed salary (no deductions)' : 'Monthly (semi-monthly)')}</td></tr>
                     <tr><td>Work days</td><td>{c.workDayPattern === 'mon_sat' ? 'Monday – Saturday' : 'Monday – Friday'}</td></tr>
                     <tr><td>Daily rate</td><td>{peso(c.dailyRate)}</td></tr>
                     {c.salaryMode === 'daily' ? (
@@ -103,10 +103,12 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                     <tr><td>Days worked</td><td>{c.workedDays}</td></tr>
                     <tr><td>Paid leave days</td><td>{c.paidLeaveDays}</td></tr>
                     <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
-                    {c.salaryMode !== 'daily' ? (
-                      <tr><td>Absence deduction ({c.absentDays} × {peso(c.dailyRate)})</td><td>− {peso(c.absenceDeduction)}</td></tr>
-                    ) : (
+                    {c.salaryMode === 'daily' ? (
                       <tr><td>Absence deduction</td><td>— (none in daily mode)</td></tr>
+                    ) : c.fixedSalary ? (
+                      <tr><td>Absence deduction</td><td>— (fixed salary)</td></tr>
+                    ) : (
+                      <tr><td>Absence deduction ({c.absentDays} × {peso(c.dailyRate)})</td><td>− {peso(c.absenceDeduction)}</td></tr>
                     )}
                     <tr><td>Overtime hours (approved OT, beyond 8h/day)</td><td>{c.overtimeHours}</td></tr>
                     <tr>
