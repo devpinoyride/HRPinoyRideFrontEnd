@@ -6,8 +6,8 @@ import BulkPayslipsPrint from '../components/BulkPayslipsPrint.jsx';
 import BulkAttendancePrint from '../components/BulkAttendancePrint.jsx';
 
 const CUTOFFS = [
-  { value: 1, label: 'Cutoff 1 · 11th – 25th' },
-  { value: 2, label: 'Cutoff 2 · 26th – 10th (next month)' }
+  { value: 1, label: 'Cutoff 1 · 1st – 15th' },
+  { value: 2, label: 'Cutoff 2 · 16th – end of month' }
 ];
 
 function monthStr() {
@@ -16,7 +16,7 @@ function monthStr() {
 }
 
 function defaultCutoff() {
-  return new Date().getDate() >= 26 ? 2 : 1;
+  return new Date().getDate() >= 16 ? 2 : 1;
 }
 
 function periodLabel(p) {
@@ -152,7 +152,7 @@ export default function PayrollPage() {
     <>
       <PageHeader
         title="Payroll"
-        subtitle="Semi-monthly payroll (11–25 and 26–10). Net pay = semi-monthly basic − absence deduction + approved overtime."
+        subtitle="Semi-monthly payroll (1–15 and 16–end of month). Net pay = semi-monthly basic − absence deduction + approved overtime."
       />
 
       {error ? <div className="alert alert-error">{error}</div> : null}

@@ -133,6 +133,10 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       </td>
                       <td>+ {peso(c.mobileAllowance)}</td>
                     </tr>
+                    <tr>
+                      <td>Sunday pay ({peso(c.dailyRate)} × {c.sundayDays} approved Sunday{c.sundayDays === 1 ? '' : 's'})</td>
+                      <td>+ {peso(c.sundayPay)}</td>
+                    </tr>
                     <tr className="netpay">
                       <td><strong>NET PAY</strong></td>
                       <td><strong>{peso(c.netPay)}</strong></td>

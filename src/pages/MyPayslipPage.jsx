@@ -4,8 +4,8 @@ import { Field, PageHeader } from '../components/ui.jsx';
 import PayslipView from '../components/PayslipView.jsx';
 
 const CUTOFFS = [
-  { value: 1, label: 'Cutoff 1 · 11th – 25th' },
-  { value: 2, label: 'Cutoff 2 · 26th – 10th (next month)' }
+  { value: 1, label: 'Cutoff 1 · 1st – 15th' },
+  { value: 2, label: 'Cutoff 2 · 16th – end of month' }
 ];
 
 function monthStr() {
@@ -14,7 +14,7 @@ function monthStr() {
 }
 
 function defaultCutoff() {
-  return new Date().getDate() >= 26 ? 2 : 1;
+  return new Date().getDate() >= 16 ? 2 : 1;
 }
 
 export default function MyPayslipPage() {
