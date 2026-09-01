@@ -146,7 +146,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
               )}
 
               <p className="muted payslip-foot">
-                System-computed from time logs (Mon–Fri workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·
+                System-computed from time logs ({c && c.workDayPattern === 'mon_sat' ? 'Mon–Sat' : 'Mon–Fri'} workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·
                 Generated {new Date().toLocaleString('en-PH')} · Subject to HR validation.
               </p>
             </div>
