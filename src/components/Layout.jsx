@@ -21,6 +21,22 @@ export default function Layout() {
           <img src="/logo-icon.png" alt="Pinoy Ride logo" className="brand-logo" />
           Pinoy Ride <strong>HR Portal</strong>
         </div>
+
+        <nav className="topbar-nav">
+          {links
+            .filter((l) => l.show)
+            .map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
+              >
+                {l.label}
+              </NavLink>
+            ))}
+        </nav>
+
         <div className="userbox">
           <span className="user-name">{auth?.fullName || 'Staff'}</span>
           <span className={`role-badge role-${auth?.role || ''}`}>{auth?.role || ''}</span>
@@ -29,21 +45,6 @@ export default function Layout() {
           </button>
         </div>
       </header>
-
-      <nav className="navbar">
-        {links
-          .filter((l) => l.show)
-          .map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.end}
-              className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
-            >
-              {l.label}
-            </NavLink>
-          ))}
-      </nav>
 
       <main className="content">
         <Outlet />

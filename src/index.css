@@ -50,13 +50,21 @@ h2 { font-size: 1.1rem; }
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 24px;
+  gap: 16px;
+  padding: 8px 24px;
   background: var(--pr-dark);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky; top: 0; z-index: 1020;
 }
 
-.brand { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; }
+/* Single-row nav: brand on the left, links in the middle, user on the right. */
+.topbar-nav {
+  display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+  flex: 1 1 auto;
+}
+
+.brand { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #fff; white-space: nowrap; }
 .brand-logo {
   height: 26px; width: auto; display: block;
   /* Melt the logo's dark background into the dark navbar. */
@@ -64,7 +72,7 @@ h2 { font-size: 1.1rem; }
 }
 .brand strong { color: var(--pr-orange); font-weight: 700; }
 
-.userbox { display: flex; align-items: center; gap: 12px; }
+.userbox { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; white-space: nowrap; }
 .user-name { font-weight: 600; color: #fff; }
 
 .role-badge {
@@ -74,18 +82,10 @@ h2 { font-size: 1.1rem; }
 .role-hr_admin { background: var(--pr-orange); color: var(--pr-dark); }
 .role-approver { background: rgba(245, 166, 35, 0.25); color: var(--pr-orange); }
 
-.navbar {
-  display: flex; gap: 4px; padding: 4px 20px;
-  background: var(--pr-dark-secondary);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  flex-wrap: wrap;
-  position: sticky; top: 0; z-index: 1020;
-}
 .nav-link {
   padding: 6px 14px; border-radius: var(--pill); color: #fff;
   text-decoration: none; font-weight: 500; font-size: 0.88rem;
-  transition: all 0.15s ease;
+  transition: all 0.15s ease; white-space: nowrap;
 }
 .nav-link:hover { color: var(--pr-orange); }
 .nav-link.active { background: var(--pr-orange); color: var(--pr-dark); font-weight: 600; }
@@ -308,6 +308,19 @@ input:disabled, select:disabled, textarea:disabled {
 }
 .incentive-toggle input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
 
+/* ---- Form tabs (staff invite/edit) ---- */
+.form-tabs {
+  display: flex; gap: 4px; border-bottom: 1px solid var(--border);
+  margin: 4px 0 18px;
+}
+.form-tab {
+  border: 0; background: transparent; padding: 9px 16px; cursor: pointer;
+  font: inherit; font-family: var(--font); font-weight: 600; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.form-tab:hover { color: var(--text); }
+.form-tab.active { color: var(--pr-orange); border-bottom-color: var(--pr-orange); }
+
 /* ---- Payslip tabs & export ---- */
 .payslip-tabs {
   display: flex; gap: 4px; border-bottom: 1px solid var(--border);
@@ -364,7 +377,6 @@ input:disabled, select:disabled, textarea:disabled {
 .login-brand p { color: var(--muted); margin: 0; font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .topbar { padding: 10px 14px; }
-  .navbar { padding: 6px 14px; }
+  .topbar { padding: 8px 14px; flex-wrap: wrap; }
   .content { padding: 16px 10px 40px; }
 }

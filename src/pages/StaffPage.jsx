@@ -16,6 +16,8 @@ export default function StaffPage() {
   const [copied, setCopied] = useState('');
 
   const [showCreate, setShowCreate] = useState(false);
+  const [createTab, setCreateTab] = useState('profile');
+  const [editTab, setEditTab] = useState('profile');
   const [createForm, setCreateForm] = useState({
     email: '',
     password: '',
@@ -136,6 +138,7 @@ export default function StaffPage() {
   function startEdit(row) {
     setEditingId(row.id);
     setEditingStaff(row);
+    setEditTab('profile');
     setEditForm({
       department: row.department || '',
       position: row.position || '',
@@ -274,7 +277,7 @@ return (
             <button className="btn btn-primary" type="submit" disabled={busy}>
               {busy ? 'Searching…' : 'Search'}
             </button>
-            <button className="btn btn-secondary" type="button" onClick={() => setShowCreate((v) => !v)}>
+            <button className="btn btn-secondary" type="button" onClick={() => { setShowCreate((v) => !v); setCreateTab('profile'); }}>
               {showCreate ? 'Hide invite form' : 'Invite staff'}
             </button>
           </div>
@@ -283,87 +286,107 @@ return (
 {showCreate ? (
         <section className="card">
           <h2>Invite new staff</h2>
-          <form className="form-grid" onSubmit={submitCreate}>
-            <Field label="Email">
-              <input type="email" required value={createForm.email} onChange={(e) => setCreateField('email', e.target.value)} />
-            </Field>
-            <Field label="Temporary password" hint="At least 8 characters">
-              <input type="text" required value={createForm.password} onChange={(e) => setCreateField('password', e.target.value)} />
-            </Field>
-            <Field label="Full name">
-              <input type="text" required value={createForm.fullName} onChange={(e) => setCreateField('fullName', e.target.value)} />
-            </Field>
-            <Field label="Department">
-              <input type="text" value={createForm.department} onChange={(e) => setCreateField('department', e.target.value)} />
-            </Field>
-            <Field label="Position">
-              <input type="text" value={createForm.position} onChange={(e) => setCreateField('position', e.target.value)} />
-            </Field>
-            <Field label="Salary mode" hint="Basic = monthly salary, Daily = paid per day worked">
-              <select value={createForm.salaryMode} onChange={(e) => setCreateField('salaryMode', e.target.value)}>
-                <option value="basic">Basic (monthly)</option>
-                <option value="daily">Daily (per day worked)</option>
-              </select>
-            </Field>
-            <Field label="Work days" hint="Which weekdays count as workdays for payroll">
-              <select value={createForm.workDays} onChange={(e) => setCreateField('workDays', e.target.value)}>
-                <option value="mon_fri">Monday – Friday</option>
-                <option value="mon_sat">Monday – Saturday</option>
-              </select>
-            </Field>
-            <Field
-              label="Basic salary (₱ / month)"
-              hint={createForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
-            >
-              <input type="number" min="0" step="0.01" value={createForm.basicSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('basicSalary', e.target.value)} />
-            </Field>
-            <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
-              <label className="incentive-toggle">
-                <input type="checkbox" checked={createForm.fixedSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('fixedSalary', e.target.checked)} />
-                <span>Ignore attendance for pay</span>
-              </label>
-            </Field>
-            <Field
-              label="Daily rate (₱ / day)"
-              hint={createForm.salaryMode === 'daily' ? 'Paid only for days the staff actually works' : 'Not used in Basic mode'}
-            >
-              <input type="number" min="0" step="0.01" value={createForm.dailyRate} disabled={createForm.salaryMode !== 'daily'} onChange={(e) => setCreateField('dailyRate', e.target.value)} />
-            </Field>
-            <Field label="Office incentive" hint="Per office workday the staff is present">
-              <div className="incentive-control">
-                <label className="incentive-toggle">
-                  <input type="checkbox" checked={createForm.officeIncentiveEnabled} onChange={(e) => setCreateField('officeIncentiveEnabled', e.target.checked)} />
-                  <span>Enabled</span>
-                </label>
-                <input type="number" min="0" step="0.01" value={createForm.officeIncentiveAmount} disabled={!createForm.officeIncentiveEnabled} onChange={(e) => setCreateField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
+          <div className="form-tabs" role="tablist">
+            <button type="button" className={'form-tab' + (createTab === 'profile' ? ' active' : '')} onClick={() => setCreateTab('profile')}>Profile</button>
+            <button type="button" className={'form-tab' + (createTab === 'compensation' ? ' active' : '')} onClick={() => setCreateTab('compensation')}>Compensation</button>
+            <button type="button" className={'form-tab' + (createTab === 'incentives' ? ' active' : '')} onClick={() => setCreateTab('incentives')}>Incentives</button>
+          </div>
+          <form onSubmit={submitCreate}>
+            {createTab === 'profile' ? (
+              <div className="form-grid">
+                <Field label="Email">
+                  <input type="email" required value={createForm.email} onChange={(e) => setCreateField('email', e.target.value)} />
+                </Field>
+                <Field label="Temporary password" hint="At least 8 characters">
+                  <input type="text" required value={createForm.password} onChange={(e) => setCreateField('password', e.target.value)} />
+                </Field>
+                <Field label="Full name">
+                  <input type="text" required value={createForm.fullName} onChange={(e) => setCreateField('fullName', e.target.value)} />
+                </Field>
+                <Field label="Department">
+                  <input type="text" value={createForm.department} onChange={(e) => setCreateField('department', e.target.value)} />
+                </Field>
+                <Field label="Position">
+                  <input type="text" value={createForm.position} onChange={(e) => setCreateField('position', e.target.value)} />
+                </Field>
+                <Field label="Role">
+                  <select value={createForm.role} onChange={(e) => setCreateField('role', e.target.value)}>
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Reports to (approver)">
+                  <select value={createForm.approverId} onChange={(e) => setCreateField('approverId', e.target.value)}>
+                    <option value="">— none —</option>
+                    {rows
+                      .filter((r) => r.status !== 'inactive' && (r.role === 'approver' || r.role === 'hr_admin'))
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>{r.fullName} ({r.role})</option>
+                      ))}
+                  </select>
+                </Field>
               </div>
-            </Field>
-            <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
-              <div className="incentive-control">
-                <label className="incentive-toggle">
-                  <input type="checkbox" checked={createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveEnabled', e.target.checked)} />
-                  <span>Enabled</span>
-                </label>
-                <input type="number" min="0" step="0.01" value={createForm.mobileIncentiveAmount} disabled={!createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+            ) : null}
+
+            {createTab === 'compensation' ? (
+              <div className="form-grid">
+                <Field label="Salary mode" hint="Basic = monthly salary, Daily = paid per day worked">
+                  <select value={createForm.salaryMode} onChange={(e) => setCreateField('salaryMode', e.target.value)}>
+                    <option value="basic">Basic (monthly)</option>
+                    <option value="daily">Daily (per day worked)</option>
+                  </select>
+                </Field>
+                <Field label="Work days" hint="Which weekdays count as workdays for payroll">
+                  <select value={createForm.workDays} onChange={(e) => setCreateField('workDays', e.target.value)}>
+                    <option value="mon_fri">Monday – Friday</option>
+                    <option value="mon_sat">Monday – Saturday</option>
+                  </select>
+                </Field>
+                <Field
+                  label="Basic salary (₱ / month)"
+                  hint={createForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
+                >
+                  <input type="number" min="0" step="0.01" value={createForm.basicSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('basicSalary', e.target.value)} />
+                </Field>
+                <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
+                  <label className="incentive-toggle">
+                    <input type="checkbox" checked={createForm.fixedSalary} disabled={createForm.salaryMode !== 'basic'} onChange={(e) => setCreateField('fixedSalary', e.target.checked)} />
+                    <span>Ignore attendance for pay</span>
+                  </label>
+                </Field>
+                <Field
+                  label="Daily rate (₱ / day)"
+                  hint={createForm.salaryMode === 'daily' ? 'Paid only for days the staff actually works' : 'Not used in Basic mode'}
+                >
+                  <input type="number" min="0" step="0.01" value={createForm.dailyRate} disabled={createForm.salaryMode !== 'daily'} onChange={(e) => setCreateField('dailyRate', e.target.value)} />
+                </Field>
               </div>
-            </Field>
-            <Field label="Role">
-              <select value={createForm.role} onChange={(e) => setCreateField('role', e.target.value)}>
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Reports to (approver)">
-              <select value={createForm.approverId} onChange={(e) => setCreateField('approverId', e.target.value)}>
-                <option value="">— none —</option>
-                {rows
-                  .filter((r) => r.status !== 'inactive' && (r.role === 'approver' || r.role === 'hr_admin'))
-                  .map((r) => (
-                    <option key={r.id} value={r.id}>{r.fullName} ({r.role})</option>
-                  ))}
-              </select>
-            </Field>
+            ) : null}
+
+            {createTab === 'incentives' ? (
+              <div className="form-grid">
+                <Field label="Office incentive" hint="Per office workday the staff is present">
+                  <div className="incentive-control">
+                    <label className="incentive-toggle">
+                      <input type="checkbox" checked={createForm.officeIncentiveEnabled} onChange={(e) => setCreateField('officeIncentiveEnabled', e.target.checked)} />
+                      <span>Enabled</span>
+                    </label>
+                    <input type="number" min="0" step="0.01" value={createForm.officeIncentiveAmount} disabled={!createForm.officeIncentiveEnabled} onChange={(e) => setCreateField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
+                  </div>
+                </Field>
+                <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
+                  <div className="incentive-control">
+                    <label className="incentive-toggle">
+                      <input type="checkbox" checked={createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveEnabled', e.target.checked)} />
+                      <span>Enabled</span>
+                    </label>
+                    <input type="number" min="0" step="0.01" value={createForm.mobileIncentiveAmount} disabled={!createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+                  </div>
+                </Field>
+              </div>
+            ) : null}
+
             <div className="form-actions">
               <button className="btn btn-primary" type="submit" disabled={busy}>
                 {busy ? 'Inviting…' : 'Invite'}
@@ -384,78 +407,98 @@ return (
               </p>
             ) : null}
           </div>
-          <form className="form-grid" onSubmit={submitEdit}>
-            <Field label="Department">
-              <input type="text" value={editForm.department} onChange={(e) => setEditField('department', e.target.value)} />
-            </Field>
-            <Field label="Position">
-              <input type="text" value={editForm.position} onChange={(e) => setEditField('position', e.target.value)} />
-            </Field>
-            <Field label="Salary mode" hint="Basic = monthly salary, Daily = paid per day worked">
-              <select value={editForm.salaryMode} onChange={(e) => setEditField('salaryMode', e.target.value)}>
-                <option value="basic">Basic (monthly)</option>
-                <option value="daily">Daily (per day worked)</option>
-              </select>
-            </Field>
-            <Field label="Work days" hint="Which weekdays count as workdays for payroll">
-              <select value={editForm.workDays} onChange={(e) => setEditField('workDays', e.target.value)}>
-                <option value="mon_fri">Monday – Friday</option>
-                <option value="mon_sat">Monday – Saturday</option>
-              </select>
-            </Field>
-            <Field
-              label="Basic salary (₱ / month)"
-              hint={editForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
-            >
-              <input type="number" min="0" step="0.01" value={editForm.basicSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('basicSalary', e.target.value)} />
-            </Field>
-            <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
-              <label className="incentive-toggle">
-                <input type="checkbox" checked={editForm.fixedSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('fixedSalary', e.target.checked)} />
-                <span>Ignore attendance for pay</span>
-              </label>
-            </Field>
-            <Field
-              label="Daily rate (₱ / day)"
-              hint={editForm.salaryMode === 'daily' ? 'Paid only for days the staff actually works' : 'Not used in Basic mode'}
-            >
-              <input type="number" min="0" step="0.01" value={editForm.dailyRate} disabled={editForm.salaryMode !== 'daily'} onChange={(e) => setEditField('dailyRate', e.target.value)} />
-            </Field>
-            <Field label="Office incentive" hint="Per office workday the staff is present">
-              <div className="incentive-control">
-                <label className="incentive-toggle">
-                  <input type="checkbox" checked={editForm.officeIncentiveEnabled} onChange={(e) => setEditField('officeIncentiveEnabled', e.target.checked)} />
-                  <span>Enabled</span>
-                </label>
-                <input type="number" min="0" step="0.01" value={editForm.officeIncentiveAmount} disabled={!editForm.officeIncentiveEnabled} onChange={(e) => setEditField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
+          <div className="form-tabs" role="tablist">
+            <button type="button" className={'form-tab' + (editTab === 'profile' ? ' active' : '')} onClick={() => setEditTab('profile')}>Profile</button>
+            <button type="button" className={'form-tab' + (editTab === 'compensation' ? ' active' : '')} onClick={() => setEditTab('compensation')}>Compensation</button>
+            <button type="button" className={'form-tab' + (editTab === 'incentives' ? ' active' : '')} onClick={() => setEditTab('incentives')}>Incentives</button>
+          </div>
+          <form onSubmit={submitEdit}>
+            {editTab === 'profile' ? (
+              <div className="form-grid">
+                <Field label="Department">
+                  <input type="text" value={editForm.department} onChange={(e) => setEditField('department', e.target.value)} />
+                </Field>
+                <Field label="Position">
+                  <input type="text" value={editForm.position} onChange={(e) => setEditField('position', e.target.value)} />
+                </Field>
+                <Field label="Role">
+                  <select value={editForm.role} onChange={(e) => setEditField('role', e.target.value)}>
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Reports to (approver)">
+                  <select value={editForm.approverId} onChange={(e) => setEditField('approverId', e.target.value)}>
+                    <option value="">— none —</option>
+                    {rows
+                      .filter((r) => r.status !== 'inactive' && (r.role === 'approver' || r.role === 'hr_admin') && r.id !== editingId)
+                      .map((r) => (
+                        <option key={r.id} value={r.id}>{r.fullName} ({r.role})</option>
+                      ))}
+                  </select>
+                </Field>
               </div>
-            </Field>
-            <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
-              <div className="incentive-control">
-                <label className="incentive-toggle">
-                  <input type="checkbox" checked={editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveEnabled', e.target.checked)} />
-                  <span>Enabled</span>
-                </label>
-                <input type="number" min="0" step="0.01" value={editForm.mobileIncentiveAmount} disabled={!editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+            ) : null}
+
+            {editTab === 'compensation' ? (
+              <div className="form-grid">
+                <Field label="Salary mode" hint="Basic = monthly salary, Daily = paid per day worked">
+                  <select value={editForm.salaryMode} onChange={(e) => setEditField('salaryMode', e.target.value)}>
+                    <option value="basic">Basic (monthly)</option>
+                    <option value="daily">Daily (per day worked)</option>
+                  </select>
+                </Field>
+                <Field label="Work days" hint="Which weekdays count as workdays for payroll">
+                  <select value={editForm.workDays} onChange={(e) => setEditField('workDays', e.target.value)}>
+                    <option value="mon_fri">Monday – Friday</option>
+                    <option value="mon_sat">Monday – Saturday</option>
+                  </select>
+                </Field>
+                <Field
+                  label="Basic salary (₱ / month)"
+                  hint={editForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
+                >
+                  <input type="number" min="0" step="0.01" value={editForm.basicSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('basicSalary', e.target.value)} />
+                </Field>
+                <Field label="Fixed salary" hint="Always full pay, no absence deduction (Basic mode only)">
+                  <label className="incentive-toggle">
+                    <input type="checkbox" checked={editForm.fixedSalary} disabled={editForm.salaryMode !== 'basic'} onChange={(e) => setEditField('fixedSalary', e.target.checked)} />
+                    <span>Ignore attendance for pay</span>
+                  </label>
+                </Field>
+                <Field
+                  label="Daily rate (₱ / day)"
+                  hint={editForm.salaryMode === 'daily' ? 'Paid only for days the staff actually works' : 'Not used in Basic mode'}
+                >
+                  <input type="number" min="0" step="0.01" value={editForm.dailyRate} disabled={editForm.salaryMode !== 'daily'} onChange={(e) => setEditField('dailyRate', e.target.value)} />
+                </Field>
               </div>
-            </Field>
-            <Field label="Role">
-              <select value={editForm.role} onChange={(e) => setEditField('role', e.target.value)}>
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Reports to (approver)">
-              <select value={editForm.approverId} onChange={(e) => setEditField('approverId', e.target.value)}>
-                <option value="">— none —</option>
-                {rows
-                  .filter((r) => r.status !== 'inactive' && (r.role === 'approver' || r.role === 'hr_admin') && r.id !== editingId)
-                  .map((r) => (
-                    <option key={r.id} value={r.id}>{r.fullName} ({r.role})</option>
-                  ))}
-              </select>
-            </Field>
+            ) : null}
+
+            {editTab === 'incentives' ? (
+              <div className="form-grid">
+                <Field label="Office incentive" hint="Per office workday the staff is present">
+                  <div className="incentive-control">
+                    <label className="incentive-toggle">
+                      <input type="checkbox" checked={editForm.officeIncentiveEnabled} onChange={(e) => setEditField('officeIncentiveEnabled', e.target.checked)} />
+                      <span>Enabled</span>
+                    </label>
+                    <input type="number" min="0" step="0.01" value={editForm.officeIncentiveAmount} disabled={!editForm.officeIncentiveEnabled} onChange={(e) => setEditField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
+                  </div>
+                </Field>
+                <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
+                  <div className="incentive-control">
+                    <label className="incentive-toggle">
+                      <input type="checkbox" checked={editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveEnabled', e.target.checked)} />
+                      <span>Enabled</span>
+                    </label>
+                    <input type="number" min="0" step="0.01" value={editForm.mobileIncentiveAmount} disabled={!editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+                  </div>
+                </Field>
+              </div>
+            ) : null}
+
             <div className="form-actions">
               <button className="btn btn-primary" type="submit" disabled={busy}>Save</button>
               <button className="btn btn-ghost" type="button" onClick={() => { setEditingId(null); setEditingStaff(null); }}>Cancel</button>
