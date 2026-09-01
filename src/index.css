@@ -235,6 +235,25 @@ input:disabled, select:disabled, textarea:disabled {
 }
 .setup-toggle button.active { background: var(--primary); color: #fff; }
 
+/* ---- Invite credentials card ---- */
+.invite-card { border-left: 4px solid var(--success); }
+.invite-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.invite-head h2 { margin: 0; color: #166534; }
+.cred-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap;
+}
+.cred-label {
+  font-size: 0.78rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.03em; min-width: 120px;
+}
+.cred-value {
+  flex: 1; min-width: 180px; padding: 8px 12px; border-radius: 8px;
+  background: #f1f5f9; border: 1px solid var(--border);
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.92rem;
+  word-break: break-all;
+}
+.invite-actions { margin-top: 14px; }
+
 /* ---- Edit staff heading ---- */
 .edit-staff-head { margin-bottom: 14px; }
 .edit-staff-head h2 { margin-bottom: 2px; }

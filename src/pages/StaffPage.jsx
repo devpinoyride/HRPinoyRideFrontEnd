@@ -10,6 +10,10 @@ export default function StaffPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  // Credentials of the most recently invited staff, shown with copy buttons
+  // so HR can hand them off manually (no email is sent).
+  const [invited, setInvited] = useState(null);
+  const [copied, setCopied] = useState('');
 
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -74,11 +78,26 @@ export default function StaffPage() {
     setEditForm((f) => ({ ...f, [name]: value }));
   }
 
+  async function copyText(text, key) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      setTimeout(() => setCopied((c) => (c === key ? '' : c)), 2000);
+    } catch {
+      setError('Could not copy to clipboard. Please copy manually.');
+    }
+  }
+
   async function submitCreate(e) {
     e.preventDefault();
     setBusy(true);
     setError('');
     setNotice('');
+    setInvited(null);
+    // Capture before the form is cleared so we can display the credentials.
+    const invitedEmail = createForm.email.trim();
+    const invitedPassword = createForm.password;
+    const invitedName = createForm.fullName.trim();
     try {
       await api.createStaff({
         email: createForm.email,
@@ -96,7 +115,8 @@ export default function StaffPage() {
         mobileIncentiveEnabled: createForm.mobileIncentiveEnabled,
         mobileIncentiveAmount: createForm.mobileIncentiveAmount === '' ? 0 : Number(createForm.mobileIncentiveAmount)
       });
-      setNotice('Staff member invited. They can now log in with the given credentials.');
+      setInvited({ name: invitedName, email: invitedEmail, password: invitedPassword });
+      setCopied('');
       setShowCreate(false);
       setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100' });
       await load();
@@ -177,6 +197,42 @@ return (
 
       {error ? <div className="alert alert-error">{error}</div> : null}
       {notice ? <div className="alert alert-success">{notice}</div> : null}
+
+      {invited ? (
+        <section className="card invite-card">
+          <div className="invite-head">
+            <h2>✓ {invited.name} invited</h2>
+            <button className="btn btn-ghost btn-sm" type="button" onClick={() => setInvited(null)}>Dismiss</button>
+          </div>
+          <p className="muted">
+            No email is sent automatically. Copy these credentials and share them with the new staff member.
+            They can log in and should change the password afterwards.
+          </p>
+          <div className="cred-row">
+            <span className="cred-label">Email</span>
+            <code className="cred-value">{invited.email}</code>
+            <button className="btn btn-secondary btn-sm" type="button" onClick={() => copyText(invited.email, 'email')}>
+              {copied === 'email' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div className="cred-row">
+            <span className="cred-label">Temp password</span>
+            <code className="cred-value">{invited.password}</code>
+            <button className="btn btn-secondary btn-sm" type="button" onClick={() => copyText(invited.password, 'password')}>
+              {copied === 'password' ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <div className="invite-actions">
+            <button
+              className="btn btn-primary btn-sm"
+              type="button"
+              onClick={() => copyText(`Email: ${invited.email}\nTemporary password: ${invited.password}`, 'both')}
+            >
+              {copied === 'both' ? 'Copied both!' : 'Copy both'}
+            </button>
+          </div>
+        </section>
+      ) : null}
 
       <section className="card">
         <form
