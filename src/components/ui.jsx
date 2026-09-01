@@ -6,21 +6,33 @@ export function fmtDate(value) {
   return s.slice(0, 10);
 }
 
+// Formats "HH:mm[:ss]" (24h) into 12-hour with an AM/PM tag, e.g. "9:00 AM".
 export function fmtTime(value) {
   if (!value) return '—';
-  // Backend serializes TimeOnly as e.g. "09:00:00" — show just HH:mm.
-  return String(value).slice(0, 5);
+  const [hStr, mStr] = String(value).split(':');
+  const h = Number(hStr);
+  const m = Number(mStr ?? 0);
+  if (Number.isNaN(h)) return String(value).slice(0, 5);
+  return to12h(h, m);
 }
 
 function pad(n) {
   return String(n).padStart(2, '0');
 }
 
+// 24h hour/minute → "h:mm AM/PM".
+function to12h(h, m) {
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${pad(m)} ${period}`;
+}
+
 export function fmtISO(value) {
   if (!value) return '—';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return String(value).slice(0, 16);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  // Date + 12-hour time with an AM/PM tag so 05:00 isn't mistaken for 5 PM.
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${to12h(d.getHours(), d.getMinutes())}`;
 }
 
 export function hoursBetween(timeIn, timeOut) {
