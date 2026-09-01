@@ -7,6 +7,7 @@ import RequestsPage from './pages/RequestsPage.jsx';
 import ApprovalsPage from './pages/ApprovalsPage.jsx';
 import ReportsPage from './pages/ReportsPage.jsx';
 import PayrollPage from './pages/PayrollPage.jsx';
+import MyPayslipPage from './pages/MyPayslipPage.jsx';
 import StaffPage from './pages/StaffPage.jsx';
 
 function RequireAuth({ children }) {
@@ -38,6 +39,7 @@ export default function App() {
         }
       >
         <Route index element={<DashboardPage />} />
+        <Route path="payslip" element={<MyPayslipPage />} />
         <Route path="requests" element={<RequestsPage />} />
         <Route
           path="approvals"

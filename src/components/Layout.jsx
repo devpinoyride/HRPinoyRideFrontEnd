@@ -6,6 +6,7 @@ export default function Layout() {
 
   const links = [
     { to: '/', label: 'Dashboard', end: true, show: true },
+    { to: '/payslip', label: 'My Payslip', show: true },
     { to: '/requests', label: 'My Requests', show: true },
     { to: '/approvals', label: 'Approvals', show: can('approver') },
     { to: '/reports', label: 'Reports', show: can('approver') },

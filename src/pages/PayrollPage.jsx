@@ -1,18 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
-import { Field, PageHeader, StatusBadge, peso, fmtDate, fmtISO } from '../components/ui.jsx';
+import { Field, PageHeader, peso, fmtDate } from '../components/ui.jsx';
+import PayslipView from '../components/PayslipView.jsx';
 
 const CUTOFFS = [
   { value: 1, label: 'Cutoff 1 · 11th – 25th' },
   { value: 2, label: 'Cutoff 2 · 26th – 10th (next month)' }
 ];
-
-const DAY_STATUS_LABEL = {
-  present: 'Present',
-  paid_leave: 'Paid leave',
-  absent: 'Absent',
-  upcoming: 'Upcoming'
-};
 
 function monthStr() {
   const d = new Date();
@@ -40,6 +34,7 @@ export default function PayrollPage() {
   const [payslip, setPayslip] = useState(null);
   const [slipBusy, setSlipBusy] = useState(false);
   const [slipError, setSlipError] = useState('');
+  const payslipRef = useRef(null);
 
   const load = useCallback(async () => {
     const [y, m] = month.split('-').map(Number);
@@ -65,6 +60,10 @@ export default function PayrollPage() {
     setSelectedId(staffId);
     setSlipBusy(true);
     setSlipError('');
+    // Scroll the payslip card into view as soon as it mounts.
+    requestAnimationFrame(() => {
+      payslipRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
     try {
       setPayslip(await api.payslip({ staffId, year: y, month: m, cutoff }));
     } catch (err) {
@@ -72,6 +71,10 @@ export default function PayrollPage() {
       setSlipError(err.message || 'Could not load the payslip.');
     } finally {
       setSlipBusy(false);
+      // Re-scroll after content renders, in case layout shifted while loading.
+      requestAnimationFrame(() => {
+        payslipRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     }
   }, [month, cutoff]);
 
@@ -110,7 +113,7 @@ export default function PayrollPage() {
         </form>
         {period ? (
           <p className="muted">
-            Period: {periodLabel(period)} · Daily rate = basic ÷ 22 · Semi-monthly basic = basic ÷ 2
+            Period: {periodLabel(period)} · Monthly: daily rate = basic ÷ 22 · semi-monthly = basic ÷ 2 · Daily mode: paid per day worked at the daily rate (no absence deduction)
           </p>
         ) : null}
       </section>
@@ -126,6 +129,7 @@ export default function PayrollPage() {
                 <tr>
                   <th>Name</th>
                   <th>Role</th>
+                  <th>Salary mode</th>
                   <th>Basic salary</th>
                   <th>Daily rate</th>
                   <th>Workdays</th>
@@ -143,6 +147,13 @@ export default function PayrollPage() {
                   <tr key={r.staffId} className={r.status === 'inactive' ? 'row-inactive' : ''}>
                     <td>{r.fullName}</td>
                     <td>{r.role}</td>
+                    <td>
+                      {r.salaryMode === 'daily' ? (
+                        <span className="badge badge-orange">Daily</span>
+                      ) : (
+                        <span className="badge">Monthly</span>
+                      )}
+                    </td>
                     <td>{r.basicSalary != null ? peso(r.basicSalary) : '—'}</td>
                     <td>{r.dailyRate != null ? peso(r.dailyRate) : '—'}</td>
                     <td>{r.workdays}</td>
@@ -166,113 +177,17 @@ export default function PayrollPage() {
             </table>
           </div>
         )}
-        <p className="muted">Staff without a basic salary show no computation — set it on the Staff page (Edit → Basic salary).</p>
+        <p className="muted">Staff without a salary set show no computation — set it on the Staff page (Edit → Basic salary or Daily rate + Salary mode).</p>
       </section>
 
       {selectedId ? (
-        <section className="card payslip-card">
-          <div className="payslip-head">
-            <img src="/logo-full.png" alt="Pinoy Ride Transport Corporation" className="payslip-logo" />
-            <div>
-              <h2>Payslip</h2>
-              <p className="muted">
-                {payslip ? periodLabel(payslip.period) : ''} · Cutoff period {periodLabel(period)}
-              </p>
-            </div>
-            <button className="btn btn-secondary no-print" type="button" onClick={() => window.print()}>
-              Print
-            </button>
-          </div>
-
-          {slipBusy ? <p className="muted">Loading payslip…</p> : null}
-          {slipError ? <div className="alert alert-error">{slipError}</div> : null}
-
-          {payslip ? (
-            <>
-              <div className="payslip-grid">
-                <div><span>Employee</span><strong>{payslip.staff.fullName}</strong></div>
-                <div><span>Position</span><strong>{payslip.staff.position || '—'}</strong></div>
-                <div><span>Department</span><strong>{payslip.staff.department || '—'}</strong></div>
-                <div><span>Role</span><strong>{payslip.staff.role}</strong></div>
-                <div><span>Email</span><strong>{payslip.staff.email || '—'}</strong></div>
-              </div>
-
-              {payslip.computation ? (
-                <table className="table payslip-computation">
-                  <tbody>
-                    <tr><td>Monthly basic salary</td><td>{peso(payslip.computation.basicSalary)}</td></tr>
-                    <tr><td>Semi-monthly basic (÷ 2)</td><td>{peso(payslip.computation.semiMonthlyBasic)}</td></tr>
-                    <tr><td>Daily rate (÷ 22)</td><td>{peso(payslip.computation.dailyRate)}</td></tr>
-                    <tr><td>Workdays in period</td><td>{payslip.computation.workdays}</td></tr>
-                    <tr><td>Days worked</td><td>{payslip.computation.workedDays}</td></tr>
-                    <tr><td>Paid leave days</td><td>{payslip.computation.paidLeaveDays}</td></tr>
-                    <tr><td>Absent days</td><td>{payslip.computation.absentDays}</td></tr>
-                    <tr>
-                      <td>Absence deduction ({payslip.computation.absentDays} × {peso(payslip.computation.dailyRate)})</td>
-                      <td>− {peso(payslip.computation.absenceDeduction)}</td>
-                    </tr>
-                    <tr><td>Overtime hours (approved OT, beyond 8h/day)</td><td>{payslip.computation.overtimeHours}</td></tr>
-                    <tr>
-                      <td>Overtime pay ({payslip.computation.overtimeHours} × hourly {peso(payslip.computation.dailyRate / 8)} × 1.25)</td>
-                      <td>+ {peso(payslip.computation.overtimePay)}</td>
-                    </tr>
-                    <tr>
-                      <td>Office allowance ({peso(100)} × office workdays present)</td>
-                      <td>+ {peso(payslip.computation.officeAllowance)}</td>
-                    </tr>
-                    <tr>
-                      <td>Mobile allowance ({peso(100)} × weeks in period)</td>
-                      <td>+ {peso(payslip.computation.mobileAllowance)}</td>
-                    </tr>
-                    <tr className="netpay">
-                      <td><strong>NET PAY</strong></td>
-                      <td><strong>{peso(payslip.computation.netPay)}</strong></td>
-                    </tr>
-                  </tbody>
-                </table>
-              ) : (
-                <div className="alert alert-error">
-                  No basic salary set for this staff member yet — set it on the Staff page (Edit → Basic salary) to compute pay.
-                </div>
-              )}
-
-              <h3>Attendance detail</h3>
-              <div className="table-wrap">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Day</th>
-                      <th>Status</th>
-                      <th>Time in</th>
-                      <th>Time out</th>
-                      <th>Hours</th>
-                      <th>Setup</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payslip.days.map((d) => (
-                      <tr key={d.date}>
-                        <td>{fmtDate(d.date)}</td>
-                        <td>{d.weekday}</td>
-                        <td><StatusBadge value={d.status} /></td>
-                        <td>{fmtISO(d.timeIn)}</td>
-                        <td>{fmtISO(d.timeOut)}</td>
-                        <td>{d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}</td>
-                        <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <p className="muted payslip-foot">
-                System-computed from time logs (Mon–Fri workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·
-                Generated {new Date().toLocaleString('en-PH')} · Subject to HR validation.
-              </p>
-            </>
-          ) : null}
-        </section>
+        <PayslipView
+          ref={payslipRef}
+          payslip={payslip}
+          period={period}
+          busy={slipBusy}
+          error={slipError}
+        />
       ) : null}
     </>
   );
