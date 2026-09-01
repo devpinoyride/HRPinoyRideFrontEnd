@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
 import { Field, PageHeader, peso, fmtDate } from '../components/ui.jsx';
 import PayslipView from '../components/PayslipView.jsx';
+import BulkPayslipsPrint from '../components/BulkPayslipsPrint.jsx';
 
 const CUTOFFS = [
   { value: 1, label: 'Cutoff 1 · 11th – 25th' },
@@ -31,6 +32,8 @@ export default function PayrollPage() {
   const [error, setError] = useState('');
 
   const [exporting, setExporting] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkPayslips, setBulkPayslips] = useState([]);
 
   const [selectedId, setSelectedId] = useState(null);
   const [payslip, setPayslip] = useState(null);
@@ -38,18 +41,46 @@ export default function PayrollPage() {
   const [slipError, setSlipError] = useState('');
   const payslipRef = useRef(null);
 
-  const exportPayroll = useCallback(async () => {
+  const exportPayrollCsv = useCallback(async () => {
     const [y, m] = month.split('-').map(Number);
     setExporting(true);
     setError('');
     try {
       await api.exportPayroll({ year: y, month: m, cutoff });
     } catch (err) {
-      setError(err.message || 'Could not export the payroll.');
+      setError(err.message || 'Could not export the payroll CSV.');
     } finally {
       setExporting(false);
     }
   }, [month, cutoff]);
+
+  // Bulk payslip PDF: fetch every staff member's full payslip, render them all
+  // into the hidden print container, then print (one payslip per page).
+  const exportPayslipsPdf = useCallback(async () => {
+    const [y, m] = month.split('-').map(Number);
+    setBulkBusy(true);
+    setError('');
+    try {
+      const slips = await Promise.all(
+        rows.map((r) => api.payslip({ staffId: r.staffId, year: y, month: m, cutoff }))
+      );
+      setBulkPayslips(slips);
+      // Wait for the print container to render before invoking print.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const cleanup = () => {
+        document.body.classList.remove('printing-bulk-payslips');
+        window.removeEventListener('afterprint', cleanup);
+      };
+      window.addEventListener('afterprint', cleanup);
+      document.body.classList.add('printing-bulk-payslips');
+      window.print();
+      setTimeout(cleanup, 1000);
+    } catch (err) {
+      setError(err.message || 'Could not export the payslips PDF.');
+    } finally {
+      setBulkBusy(false);
+    }
+  }, [month, cutoff, rows]);
 
   const load = useCallback(async () => {
     const [y, m] = month.split('-').map(Number);
@@ -136,15 +167,26 @@ export default function PayrollPage() {
       <section className="card no-print">
         <div className="section-head">
           <h2>Payroll summary ({rows.length})</h2>
-          <button
-            className="btn btn-secondary btn-sm"
-            type="button"
-            onClick={exportPayroll}
-            disabled={exporting || busy || rows.length === 0}
-            title="Download all staff payroll for this cutoff as CSV"
-          >
-            {exporting ? 'Exporting…' : 'Export payroll CSV'}
-          </button>
+          <div className="section-actions">
+            <button
+              className="btn btn-secondary btn-sm"
+              type="button"
+              onClick={exportPayslipsPdf}
+              disabled={bulkBusy || busy || rows.length === 0}
+              title="Print all staff payslips as one PDF (one per page)"
+            >
+              {bulkBusy ? 'Preparing…' : 'Export all payslips PDF'}
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              type="button"
+              onClick={exportPayrollCsv}
+              disabled={exporting || busy || rows.length === 0}
+              title="Download all staff payroll for this cutoff as CSV"
+            >
+              {exporting ? 'Exporting…' : 'Export payslips CSV'}
+            </button>
+          </div>
         </div>
         {rows.length === 0 ? (
           <p className="muted">No staff found.</p>
@@ -215,6 +257,8 @@ export default function PayrollPage() {
           error={slipError}
         />
       ) : null}
+
+      <BulkPayslipsPrint payslips={bulkPayslips} period={period} />
     </>
   );
 }

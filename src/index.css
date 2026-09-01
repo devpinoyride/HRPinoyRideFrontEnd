@@ -87,6 +87,10 @@ h2 { font-size: 1.1rem; }
   gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
 }
 .section-head h2 { margin: 0; }
+.section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Bulk print containers are hidden on screen; shown only during their print. */
+.bulk-print { display: none; }
 
 .clock-card {
   display: flex; align-items: center; justify-content: space-between;
@@ -300,6 +304,21 @@ input:disabled, select:disabled, textarea:disabled {
 
   body.printing-payslip .attendance-section { display: none !important; }
   body.printing-attendance .payslip-pane { display: none !important; }
+
+  /* Bulk payslips PDF: hide everything else, show only the stacked payslips
+     with one payslip per page. */
+  body.printing-bulk-payslips .card,
+  body.printing-bulk-payslips .page-header { display: none !important; }
+  body.printing-bulk-payslips .bulk-print { display: block !important; }
+  .bulk-print .bulk-page {
+    page-break-after: always;
+    break-after: page;
+    padding-bottom: 8px;
+  }
+  .bulk-print .bulk-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
 }
 .login-brand h1 { font-size: 1.35rem; margin-bottom: 2px; }
 .login-brand p { color: var(--muted); margin: 0; font-size: 0.9rem; }
