@@ -3,6 +3,7 @@ import { api } from '../api/client.js';
 import { Field, PageHeader, peso, fmtDate } from '../components/ui.jsx';
 import PayslipView from '../components/PayslipView.jsx';
 import BulkPayslipsPrint from '../components/BulkPayslipsPrint.jsx';
+import BulkAttendancePrint from '../components/BulkAttendancePrint.jsx';
 
 const CUTOFFS = [
   { value: 1, label: 'Cutoff 1 · 11th – 25th' },
@@ -48,15 +49,29 @@ export default function PayrollPage() {
     try {
       await api.exportPayroll({ year: y, month: m, cutoff });
     } catch (err) {
-      setError(err.message || 'Could not export the payroll CSV.');
+      setError(err.message || 'Could not export the payslips CSV.');
     } finally {
       setExporting(false);
     }
   }, [month, cutoff]);
 
-  // Bulk payslip PDF: fetch every staff member's full payslip, render them all
-  // into the hidden print container, then print (one payslip per page).
-  const exportPayslipsPdf = useCallback(async () => {
+  const exportAttendanceCsv = useCallback(async () => {
+    const [y, m] = month.split('-').map(Number);
+    setExporting(true);
+    setError('');
+    try {
+      await api.exportAttendance({ year: y, month: m, cutoff });
+    } catch (err) {
+      setError(err.message || 'Could not export the attendance CSV.');
+    } finally {
+      setExporting(false);
+    }
+  }, [month, cutoff]);
+
+  // Fetch every staff member's payslip (used by both bulk PDF exports), render
+  // it into the matching hidden print container, then print. `bodyClass`
+  // selects which container the print stylesheet reveals.
+  const printBulk = useCallback(async (bodyClass, failMessage) => {
     const [y, m] = month.split('-').map(Number);
     setBulkBusy(true);
     setError('');
@@ -68,19 +83,28 @@ export default function PayrollPage() {
       // Wait for the print container to render before invoking print.
       await new Promise((resolve) => setTimeout(resolve, 100));
       const cleanup = () => {
-        document.body.classList.remove('printing-bulk-payslips');
+        document.body.classList.remove(bodyClass);
         window.removeEventListener('afterprint', cleanup);
       };
       window.addEventListener('afterprint', cleanup);
-      document.body.classList.add('printing-bulk-payslips');
+      document.body.classList.add(bodyClass);
       window.print();
       setTimeout(cleanup, 1000);
     } catch (err) {
-      setError(err.message || 'Could not export the payslips PDF.');
+      setError(err.message || failMessage);
     } finally {
       setBulkBusy(false);
     }
   }, [month, cutoff, rows]);
+
+  const exportPayslipsPdf = useCallback(
+    () => printBulk('printing-bulk-payslips', 'Could not export the payslips PDF.'),
+    [printBulk]
+  );
+  const exportAttendancePdf = useCallback(
+    () => printBulk('printing-bulk-attendance', 'Could not export the attendance PDF.'),
+    [printBulk]
+  );
 
   const load = useCallback(async () => {
     const [y, m] = month.split('-').map(Number);
@@ -175,7 +199,7 @@ export default function PayrollPage() {
               disabled={bulkBusy || busy || rows.length === 0}
               title="Print all staff payslips as one PDF (one per page)"
             >
-              {bulkBusy ? 'Preparing…' : 'Export all payslips PDF'}
+              {bulkBusy ? 'Preparing…' : 'Payslips PDF'}
             </button>
             <button
               className="btn btn-secondary btn-sm"
@@ -184,7 +208,25 @@ export default function PayrollPage() {
               disabled={exporting || busy || rows.length === 0}
               title="Download all staff payroll for this cutoff as CSV"
             >
-              {exporting ? 'Exporting…' : 'Export payslips CSV'}
+              Payslips CSV
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              type="button"
+              onClick={exportAttendancePdf}
+              disabled={bulkBusy || busy || rows.length === 0}
+              title="Print all staff attendance detail as one PDF (one per page)"
+            >
+              {bulkBusy ? 'Preparing…' : 'Attendance PDF'}
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              type="button"
+              onClick={exportAttendanceCsv}
+              disabled={exporting || busy || rows.length === 0}
+              title="Download all staff attendance detail for this cutoff as CSV"
+            >
+              Attendance CSV
             </button>
           </div>
         </div>
@@ -259,6 +301,7 @@ export default function PayrollPage() {
       ) : null}
 
       <BulkPayslipsPrint payslips={bulkPayslips} period={period} />
+      <BulkAttendancePrint payslips={bulkPayslips} period={period} />
     </>
   );
 }

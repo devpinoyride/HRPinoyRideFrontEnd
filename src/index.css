@@ -305,11 +305,14 @@ input:disabled, select:disabled, textarea:disabled {
   body.printing-payslip .attendance-section { display: none !important; }
   body.printing-attendance .payslip-pane { display: none !important; }
 
-  /* Bulk payslips PDF: hide everything else, show only the stacked payslips
-     with one payslip per page. */
+  /* Bulk PDF exports: hide everything else, show only the matching stacked
+     print container (payslips or attendance), one record per page. */
   body.printing-bulk-payslips .card,
-  body.printing-bulk-payslips .page-header { display: none !important; }
-  body.printing-bulk-payslips .bulk-print { display: block !important; }
+  body.printing-bulk-payslips .page-header,
+  body.printing-bulk-attendance .card,
+  body.printing-bulk-attendance .page-header { display: none !important; }
+  body.printing-bulk-payslips .bulk-payslips-print { display: block !important; }
+  body.printing-bulk-attendance .bulk-attendance-print { display: block !important; }
   .bulk-print .bulk-page {
     page-break-after: always;
     break-after: page;
