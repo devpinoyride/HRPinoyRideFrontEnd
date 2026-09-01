@@ -29,6 +29,9 @@ function printSection(sectionClass) {
 const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, error }, ref) {
   const [tab, setTab] = useState('payslip');
   const c = payslip?.computation || null;
+  // Days with a clock-out earlier than clock-in (negative hours) are invalid
+  // and need correction — their tardiness is excluded from the deduction.
+  const invalidDays = (payslip?.days || []).filter((d) => d.status === 'present' && d.hours != null && d.hours < 0);
 
   return (
     <section className="card payslip-card" ref={ref}>
@@ -76,6 +79,14 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                   Export payslip PDF
                 </button>
               </div>
+
+              {invalidDays.length > 0 ? (
+                <div className="alert alert-warning">
+                  <strong>{invalidDays.length} invalid time {invalidDays.length === 1 ? 'entry' : 'entries'} detected.</strong>{' '}
+                  {invalidDays.map((d) => fmtDate(d.date)).join(', ')} — the clock-out is earlier than the clock-in
+                  (check for an AM/PM mistake). These days are excluded from tardiness and hours until corrected.
+                </div>
+              ) : null}
 
               <div className="payslip-grid">
                 <div><span>Employee</span><strong>{payslip.staff.fullName}</strong></div>
@@ -143,6 +154,9 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         {(c.lateMinutes || c.earlyOutMinutes)
                           ? ` (${c.lateMinutes} min late + ${c.earlyOutMinutes} min undertime × ${peso(c.minuteRate)}/min)`
                           : ' (none)'}
+                        {invalidDays.length > 0
+                          ? ` — excludes ${invalidDays.length} invalid entr${invalidDays.length === 1 ? 'y' : 'ies'} pending correction`
+                          : ''}
                       </td>
                       <td>− {peso(c.tardinessDeduction)}</td>
                     </tr>
@@ -203,12 +217,22 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         <td><StatusBadge value={d.status} /></td>
                         <td>{fmtISO(d.timeIn)}</td>
                         <td>{fmtISO(d.timeOut)}</td>
-                        <td>{d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}</td>
+                        <td className={d.hours != null && d.hours < 0 ? 'cell-invalid' : ''}>
+                          {d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}
+                        </td>
                         <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
                         <td>
-                          {d.lateMinutes ? <span className="badge badge-absent" title={`${d.lateMinutes} min late`}>Late {d.lateMinutes}m</span> : null}
-                          {d.earlyOutMinutes ? <span className="badge badge-absent" title={`${d.earlyOutMinutes} min undertime`}>Early {d.earlyOutMinutes}m</span> : null}
-                          {(!d.lateMinutes && !d.earlyOutMinutes && d.status === 'present') ? <span className="badge badge-present">On time</span> : null}
+                          {/* Invalid entry: clock-out is not after clock-in (e.g. AM/PM
+                              mistake) → negative hours. Flag it instead of "On time". */}
+                          {d.status === 'present' && d.hours != null && d.hours < 0 ? (
+                            <span className="badge badge-absent" title="Time out is earlier than time in — please correct this entry.">Invalid time</span>
+                          ) : (
+                            <>
+                              {d.lateMinutes ? <span className="badge badge-absent" title={`${d.lateMinutes} min late`}>Late {d.lateMinutes}m</span> : null}
+                              {d.earlyOutMinutes ? <span className="badge badge-absent" title={`${d.earlyOutMinutes} min undertime`}>Early {d.earlyOutMinutes}m</span> : null}
+                              {(!d.lateMinutes && !d.earlyOutMinutes && d.status === 'present') ? <span className="badge badge-present">On time</span> : null}
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
