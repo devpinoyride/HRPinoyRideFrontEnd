@@ -257,8 +257,13 @@ input:disabled, select:disabled, textarea:disabled {
 .payslip-head > div { flex: 1; }
 .payslip-logo { height: 56px; width: auto; }
 .payslip-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px 18px; margin: 14px 0;
+}
+.payslip-grid > div { min-width: 0; }
+/* Long values (e.g. email) wrap within their cell instead of overflowing the card. */
+.payslip-grid > div strong {
+  display: block; overflow-wrap: anywhere; word-break: break-word;
 }
 .payslip-grid span {
   display: block; font-size: .72rem; color: var(--muted);
