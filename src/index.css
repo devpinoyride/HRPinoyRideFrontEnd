@@ -267,6 +267,7 @@ input:disabled, select:disabled, textarea:disabled {
 .payslip-computation td:last-child { text-align: right; }
 .payslip-computation .netpay td { border-top: 2px solid var(--primary); font-size: 1.02rem; }
 .payslip-foot { font-size: .78rem; margin-top: 12px; }
+.cell-invalid { color: var(--danger); font-weight: 600; }
 .badge-present { background: #e7f6ec; color: #177245; }
 .badge-absent { background: #fdeaea; color: #b02a2a; }
 .badge-sunday { background: #ffedd5; color: #9a3412; }
