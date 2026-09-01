@@ -30,7 +30,8 @@ export default function StaffPage() {
     officeIncentiveEnabled: true,
     officeIncentiveAmount: '100',
     mobileIncentiveEnabled: true,
-    mobileIncentiveAmount: '100'
+    mobileIncentiveAmount: '100',
+    workDays: 'mon_fri'
   });
 
   const [editingId, setEditingId] = useState(null);
@@ -46,7 +47,8 @@ export default function StaffPage() {
     officeIncentiveEnabled: true,
     officeIncentiveAmount: '100',
     mobileIncentiveEnabled: true,
-    mobileIncentiveAmount: '100'
+    mobileIncentiveAmount: '100',
+    workDays: 'mon_fri'
   });
 
   const load = useCallback(async () => {
@@ -113,12 +115,13 @@ export default function StaffPage() {
         officeIncentiveEnabled: createForm.officeIncentiveEnabled,
         officeIncentiveAmount: createForm.officeIncentiveAmount === '' ? 0 : Number(createForm.officeIncentiveAmount),
         mobileIncentiveEnabled: createForm.mobileIncentiveEnabled,
-        mobileIncentiveAmount: createForm.mobileIncentiveAmount === '' ? 0 : Number(createForm.mobileIncentiveAmount)
+        mobileIncentiveAmount: createForm.mobileIncentiveAmount === '' ? 0 : Number(createForm.mobileIncentiveAmount),
+        workDays: createForm.workDays
       });
       setInvited({ name: invitedName, email: invitedEmail, password: invitedPassword });
       setCopied('');
       setShowCreate(false);
-      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100' });
+      setCreateForm({ email: '', password: '', fullName: '', department: '', position: '', role: 'employee', approverId: '', basicSalary: '', salaryMode: 'basic', dailyRate: '', officeIncentiveEnabled: true, officeIncentiveAmount: '100', mobileIncentiveEnabled: true, mobileIncentiveAmount: '100', workDays: 'mon_fri' });
       await load();
     } catch (err) {
       setError(err.message || 'Could not create staff member.');
@@ -141,7 +144,8 @@ export default function StaffPage() {
       officeIncentiveEnabled: row.officeIncentiveEnabled ?? true,
       officeIncentiveAmount: row.officeIncentiveAmount ?? '100',
       mobileIncentiveEnabled: row.mobileIncentiveEnabled ?? true,
-      mobileIncentiveAmount: row.mobileIncentiveAmount ?? '100'
+      mobileIncentiveAmount: row.mobileIncentiveAmount ?? '100',
+      workDays: row.workDays || 'mon_fri'
     });
     setError('');
   }
@@ -163,7 +167,8 @@ export default function StaffPage() {
         officeIncentiveEnabled: editForm.officeIncentiveEnabled,
         officeIncentiveAmount: editForm.officeIncentiveAmount === '' ? 0 : Number(editForm.officeIncentiveAmount),
         mobileIncentiveEnabled: editForm.mobileIncentiveEnabled,
-        mobileIncentiveAmount: editForm.mobileIncentiveAmount === '' ? 0 : Number(editForm.mobileIncentiveAmount)
+        mobileIncentiveAmount: editForm.mobileIncentiveAmount === '' ? 0 : Number(editForm.mobileIncentiveAmount),
+        workDays: editForm.workDays
       });
       setNotice('Staff member updated.');
       setEditingId(null);
@@ -295,6 +300,12 @@ return (
                 <option value="daily">Daily (per day worked)</option>
               </select>
             </Field>
+            <Field label="Work days" hint="Which weekdays count as workdays for payroll">
+              <select value={createForm.workDays} onChange={(e) => setCreateField('workDays', e.target.value)}>
+                <option value="mon_fri">Monday – Friday</option>
+                <option value="mon_sat">Monday – Saturday</option>
+              </select>
+            </Field>
             <Field
               label="Basic salary (₱ / month)"
               hint={createForm.salaryMode === 'basic' ? 'Used for payslip computation' : 'Not used in Daily mode'}
@@ -373,6 +384,12 @@ return (
               <select value={editForm.salaryMode} onChange={(e) => setEditField('salaryMode', e.target.value)}>
                 <option value="basic">Basic (monthly)</option>
                 <option value="daily">Daily (per day worked)</option>
+              </select>
+            </Field>
+            <Field label="Work days" hint="Which weekdays count as workdays for payroll">
+              <select value={editForm.workDays} onChange={(e) => setEditField('workDays', e.target.value)}>
+                <option value="mon_fri">Monday – Friday</option>
+                <option value="mon_sat">Monday – Saturday</option>
               </select>
             </Field>
             <Field
