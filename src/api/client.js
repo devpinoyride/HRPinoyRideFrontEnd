@@ -105,6 +105,29 @@ export const api = {
 
   payrollSummary: (params) => request(`/api/payroll/summary${qs(params)}`),
   payslip: (params) => request(`/api/payroll/payslip${qs(params)}`),
+  exportPayroll: async (params) => {
+    const token = currentToken();
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(API_URL + `/api/payroll/export${qs(params)}`, { headers });
+    if (!res.ok) {
+      const err = new Error(`Payroll export failed (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    const dispo = res.headers.get('Content-Disposition') || '';
+    const match = dispo.match(/filename="?([^"]+)"?/i);
+    const name = match ? match[1] : 'payroll.csv';
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  },
   downloadReport: async (params) => {
     const token = currentToken();
     const headers = {};

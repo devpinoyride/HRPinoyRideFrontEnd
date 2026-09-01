@@ -82,6 +82,11 @@ h2 { font-size: 1.1rem; }
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 20px; margin-bottom: 24px;
 }
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.section-head h2 { margin: 0; }
 
 .clock-card {
   display: flex; align-items: center; justify-content: space-between;
@@ -179,6 +184,7 @@ input:disabled, select:disabled, textarea:disabled {
 .badge-rejected, .badge-inactive { background: var(--danger-bg); color: var(--danger); }
 .badge-self_logged { background: #ede9fe; color: #5b21b6; }
 .badge-adjusted { background: #cffafe; color: #155e75; }
+.badge-orange { background: #ffedd5; color: #9a3412; }
 
 /* ---------- Login ---------- */
 .login-page {

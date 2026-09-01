@@ -30,11 +30,26 @@ export default function PayrollPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  const [exporting, setExporting] = useState(false);
+
   const [selectedId, setSelectedId] = useState(null);
   const [payslip, setPayslip] = useState(null);
   const [slipBusy, setSlipBusy] = useState(false);
   const [slipError, setSlipError] = useState('');
   const payslipRef = useRef(null);
+
+  const exportPayroll = useCallback(async () => {
+    const [y, m] = month.split('-').map(Number);
+    setExporting(true);
+    setError('');
+    try {
+      await api.exportPayroll({ year: y, month: m, cutoff });
+    } catch (err) {
+      setError(err.message || 'Could not export the payroll.');
+    } finally {
+      setExporting(false);
+    }
+  }, [month, cutoff]);
 
   const load = useCallback(async () => {
     const [y, m] = month.split('-').map(Number);
@@ -119,7 +134,18 @@ export default function PayrollPage() {
       </section>
 
       <section className="card no-print">
-        <h2>Payroll summary ({rows.length})</h2>
+        <div className="section-head">
+          <h2>Payroll summary ({rows.length})</h2>
+          <button
+            className="btn btn-secondary btn-sm"
+            type="button"
+            onClick={exportPayroll}
+            disabled={exporting || busy || rows.length === 0}
+            title="Download all staff payroll for this cutoff as CSV"
+          >
+            {exporting ? 'Exporting…' : 'Export payroll CSV'}
+          </button>
+        </div>
         {rows.length === 0 ? (
           <p className="muted">No staff found.</p>
         ) : (
