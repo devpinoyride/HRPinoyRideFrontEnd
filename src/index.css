@@ -1,18 +1,28 @@
 :root {
-  --bg: #f4f6f9;
+  /* PinoyRide brand palette (matches the admin portal theme) */
+  --pr-orange: #F5A623;
+  --pr-orange-hover: #e0951a;
+  --pr-dark: #111111;
+  --pr-dark-secondary: #1a1a1a;
+  --pr-text-muted-dark: #cccccc;
+
+  --bg: #f8f9fa;
   --surface: #ffffff;
-  --border: #e2e8f0;
-  --text: #1e293b;
-  --muted: #64748b;
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
+  --border: #e5e7eb;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #F5A623;
+  --primary-dark: #e0951a;
+  --primary-contrast: #111111;
   --success: #16a34a;
   --success-bg: #dcfce7;
   --danger: #dc2626;
   --danger-bg: #fee2e2;
   --warning-bg: #fef3c7;
-  --radius: 10px;
-  --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --radius: 8px;
+  --pill: 24px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --font: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 * {
@@ -21,14 +31,14 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   font-size: 15px;
   line-height: 1.5;
 }
 
-h1, h2, h3 { margin: 0 0 0.5rem; }
+h1, h2, h3, h4, h5, h6 { margin: 0 0 0.5rem; font-family: var(--font); font-weight: 700; }
 h1 { font-size: 1.5rem; }
 h2 { font-size: 1.1rem; }
 
@@ -42,46 +52,61 @@ h2 { font-size: 1.1rem; }
   align-items: center;
   justify-content: space-between;
   padding: 12px 28px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--pr-dark);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.brand { font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+.brand { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #fff; }
 .brand-logo {
-  height: 34px; width: auto; display: block;
+  height: 32px; width: auto; display: block;
+  /* Melt the logo's dark background into the dark navbar. */
+  mix-blend-mode: screen;
 }
-.brand strong { color: var(--primary); }
+.brand strong { color: var(--pr-orange); font-weight: 700; }
 
-.userbox { display: flex; align-items: center; gap: 10px; }
-.user-name { font-weight: 600; }
+.userbox { display: flex; align-items: center; gap: 12px; }
+.user-name { font-weight: 600; color: #fff; }
 
 .role-badge {
-  padding: 3px 10px; border-radius: 999px; font-size: 0.75rem;
-  background: #e0e7ff; color: #3730a3; text-transform: capitalize;
+  padding: 3px 12px; border-radius: var(--pill); font-size: 0.75rem; font-weight: 600;
+  background: rgba(255, 255, 255, 0.12); color: #fff; text-transform: capitalize;
 }
-.role-hr_admin { background: #dcfce7; color: #166534; }
-.role-approver { background: #cffafe; color: #155e75; }
+.role-hr_admin { background: var(--pr-orange); color: var(--pr-dark); }
+.role-approver { background: rgba(245, 166, 35, 0.25); color: var(--pr-orange); }
 
 .navbar {
-  display: flex; gap: 4px; padding: 8px 28px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; gap: 4px; padding: 8px 24px;
+  background: var(--pr-dark-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 1020;
 }
 .nav-link {
-  padding: 7px 14px; border-radius: 8px; color: var(--muted);
-  text-decoration: none; font-weight: 600; font-size: 0.9rem;
+  padding: 8px 16px; border-radius: var(--pill); color: #fff;
+  text-decoration: none; font-weight: 500; font-size: 0.9rem;
+  transition: all 0.15s ease;
 }
-.nav-link:hover { background: #f1f5f9; }
-.nav-link.active { background: var(--primary); color: #fff; }
+.nav-link:hover { color: var(--pr-orange); }
+.nav-link.active { background: var(--pr-orange); color: var(--pr-dark); font-weight: 600; }
 
 .content { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+.page-header { margin-bottom: 20px; }
+.page-header h1 { margin-bottom: 4px; }
+.page-header p { color: var(--muted); margin: 0; font-size: 0.92rem; }
 
 /* ---------- Cards & alerts ---------- */
 .card {
   background: var(--surface); border: 1px solid var(--border);
+  border-top: 3px solid var(--pr-orange);
   border-radius: var(--radius); box-shadow: var(--shadow);
   padding: 20px; margin-bottom: 24px;
 }
+
+/* Ghost button on the dark topbar (e.g. Log out). */
+.topbar .btn-ghost { color: #fff; }
+.topbar .btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
 .section-head {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
@@ -95,7 +120,8 @@ h2 { font-size: 1.1rem; }
 .clock-card {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap;
-  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  background: linear-gradient(135deg, #1a1a1a, #2b2b2b);
+  border: 1px solid rgba(245, 166, 35, 0.35);
   color: #fff; border-radius: var(--radius); padding: 24px;
   margin-bottom: 24px;
 }
@@ -120,27 +146,28 @@ h2 { font-size: 1.1rem; }
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column;
 }
-.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+.stat-card { border-top: 3px solid var(--pr-orange); }
+.stat-value { font-size: 1.8rem; font-weight: 700; color: var(--pr-orange); }
 .stat-label { color: var(--muted); font-size: 0.85rem; }
 
 /* ---------- Buttons ---------- */
 .btn {
-  border: 1px solid transparent; border-radius: 8px; cursor: pointer;
-  padding: 9px 16px; font-size: 0.92rem; font-weight: 600;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid transparent; border-radius: var(--pill); cursor: pointer;
+  padding: 9px 20px; font-size: 0.9rem; font-weight: 600; font-family: var(--font);
+  transition: background 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
 }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
-.btn-secondary { background: #fff; color: var(--text); border-color: var(--border); }
-.btn-secondary:hover:not(:disabled) { background: #f8fafc; }
+.btn-primary { background: var(--pr-orange); color: var(--pr-dark); font-weight: 700; }
+.btn-primary:hover:not(:disabled) { background: var(--pr-orange-hover); color: var(--pr-dark); }
+.btn-secondary { background: #fff; color: #333; border-color: var(--border); }
+.btn-secondary:hover:not(:disabled) { background: #f1f1f1; }
 .btn-success { background: var(--success); color: #fff; }
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-warning { background: #d97706; color: #fff; }
 .btn-warning:hover:not(:disabled) { background: #b45309; }
 .btn-ghost { background: transparent; color: var(--muted); }
 .btn-ghost:hover:not(:disabled) { background: #f1f5f9; }
-.btn-sm { padding: 5px 10px; font-size: 0.82rem; }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; }
 .btn-block { width: 100%; margin-top: 14px; }
 
 /* ---------- Forms ---------- */
@@ -157,8 +184,8 @@ input, select, textarea {
   font: inherit; color: var(--text); background: #fff; width: 100%;
 }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none; border-color: var(--pr-orange);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18);
 }
 input:disabled, select:disabled, textarea:disabled {
   background: #f1f5f9; color: var(--muted); cursor: not-allowed;
@@ -193,12 +220,13 @@ input:disabled, select:disabled, textarea:disabled {
 /* ---------- Login ---------- */
 .login-page {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(160deg, #eff6ff, #f4f6f9);
+  background: linear-gradient(160deg, #fff7e6, #f8f9fa);
   padding: 20px;
 }
 .login-card {
   width: 100%; max-width: 400px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow);
+  border: 1px solid var(--border); border-top: 3px solid var(--pr-orange);
+  border-radius: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
   padding: 30px;
 }
 .login-brand { text-align: center; margin-bottom: 18px; }
@@ -237,7 +265,7 @@ input:disabled, select:disabled, textarea:disabled {
   border: 0; background: transparent; padding: 8px 16px;
   cursor: pointer; font: inherit; color: var(--muted);
 }
-.setup-toggle button.active { background: var(--primary); color: #fff; }
+.setup-toggle button.active { background: var(--pr-orange); color: var(--pr-dark); font-weight: 600; }
 
 /* ---- Invite credentials card ---- */
 .invite-card { border-left: 4px solid var(--success); }
@@ -324,6 +352,7 @@ input:disabled, select:disabled, textarea:disabled {
   }
 }
 .login-brand h1 { font-size: 1.35rem; margin-bottom: 2px; }
+.login-brand h1 strong { color: var(--pr-orange); }
 .login-brand p { color: var(--muted); margin: 0; font-size: 0.9rem; }
 
 @media (max-width: 640px) {
