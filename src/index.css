@@ -275,6 +275,7 @@ input:disabled, select:disabled, textarea:disabled {
 .cell-invalid { color: var(--danger); font-weight: 600; }
 .badge-present { background: #e7f6ec; color: #177245; }
 .badge-absent { background: #fdeaea; color: #b02a2a; }
+.badge-no_clock_out { background: #fdeaea; color: #b02a2a; }
 .badge-sunday { background: #ffedd5; color: #9a3412; }
 .badge-paid_leave { background: #eaf1fd; color: #2456a6; }
 .badge-upcoming { background: #eef0f4; color: #7a8494; }

@@ -48,9 +48,16 @@ export function peso(value) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(Number(value));
 }
 
+const STATUS_LABELS = {
+  no_clock_out: 'No clock out',
+  paid_leave: 'Paid leave',
+  self_logged: 'Self logged'
+};
+
 export function StatusBadge({ value }) {
   const v = value || '—';
-  return <span className={`badge badge-${String(v).toLowerCase()}`}>{v}</span>;
+  const label = STATUS_LABELS[String(v).toLowerCase()] || v;
+  return <span className={`badge badge-${String(v).toLowerCase()}`}>{label}</span>;
 }
 
 export function PageHeader({ title, subtitle }) {

@@ -222,9 +222,10 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         </td>
                         <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
                         <td>
-                          {/* Invalid entry: clock-out is not after clock-in (e.g. AM/PM
-                              mistake) → negative hours. Flag it instead of "On time". */}
-                          {d.status === 'present' && d.hours != null && d.hours < 0 ? (
+                          {/* Missing clock-out → counts as absent; needs a correction request. */}
+                          {d.status === 'no_clock_out' ? (
+                            <span className="badge badge-absent" title="Clocked in but no clock out — file a correction request.">No clock out</span>
+                          ) : d.status === 'present' && d.hours != null && d.hours < 0 ? (
                             <span className="badge badge-absent" title="Time out is earlier than time in — please correct this entry.">Invalid time</span>
                           ) : (
                             <>
