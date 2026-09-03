@@ -31,10 +31,13 @@ export default function RequestsPage() {
     requestedTimeOut: '18:00',
     requestType: prefill?.requestType || 'adjustment',
     reason: '',
-    leaveDuration: 'whole'
+    leaveDuration: 'whole',
+    workSetup: 'office'
   });
 
   const isLeave = form.requestType === 'leave';
+  // Adjustment/overtime carry the work setup the approved entry will use.
+  const usesWorkSetup = form.requestType === 'adjustment' || form.requestType === 'overtime';
   // Leave must be filed at least 3 days in advance; other types are for
   // correcting past/current dates.
   const LEAVE_ADVANCE_DAYS = 3;
@@ -73,7 +76,8 @@ export default function RequestsPage() {
         requestedTimeOut: form.requestedTimeOut,
         requestType: form.requestType,
         reason: form.reason,
-        leaveDuration: form.requestType === 'leave' ? form.leaveDuration : null
+        leaveDuration: form.requestType === 'leave' ? form.leaveDuration : null,
+        workSetup: usesWorkSetup ? form.workSetup : null
       });
       setNotice('Request submitted for approval.');
       setForm((f) => ({ ...f, reason: '' }));
@@ -130,6 +134,14 @@ export default function RequestsPage() {
           <Field label="Requested time out">
             <input type="time" required value={form.requestedTimeOut} onChange={(e) => setField('requestedTimeOut', e.target.value)} />
           </Field>
+          {usesWorkSetup ? (
+            <Field label="Work setup" hint="Office or work-from-home for this day">
+              <select value={form.workSetup} onChange={(e) => setField('workSetup', e.target.value)}>
+                <option value="office">Office</option>
+                <option value="wfh">WFH</option>
+              </select>
+            </Field>
+          ) : null}
           <Field label="Reason">
             <textarea rows={3} required value={form.reason} onChange={(e) => setField('reason', e.target.value)} placeholder="Why are you requesting this adjustment?" />
           </Field>

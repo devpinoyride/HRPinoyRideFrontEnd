@@ -87,6 +87,7 @@ export default function ApprovalsPage() {
                     <td>
                       {r.requestType}
                       {r.requestType === 'leave' && r.leaveDuration ? ` · ${leaveDurationLabel(r.leaveDuration)}` : ''}
+                      {r.workSetup ? ` · ${r.workSetup === 'wfh' ? 'WFH' : 'Office'}` : ''}
                     </td>
                     <td>{r.reason}</td>
                     <td>
