@@ -233,6 +233,22 @@ export default function StaffPage() {
       setBusy(false);
     }
   }
+
+  async function activate(row) {
+    if (!window.confirm(`Activate ${row.fullName}? They will be able to log in and appear in payroll again.`)) return;
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.activateStaff(row.id);
+      setNotice(`${row.fullName} has been activated.`);
+      await load();
+    } catch (err) {
+      setError(err.message || 'Could not activate staff member.');
+    } finally {
+      setBusy(false);
+    }
+  }
 return (
     <>
       <PageHeader title="Staff" subtitle="Manage profiles, roles and reporting lines." />
@@ -570,7 +586,10 @@ return (
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className={row.status === 'inactive' ? 'row-inactive' : ''}>
-                    <td>{row.fullName}</td>
+                    <td>
+                      {row.fullName}
+                      {row.status === 'inactive' ? <span className="badge badge-inactive staff-flag">Inactive</span> : null}
+                    </td>
                     <td>{row.email || '—'}</td>
                     <td>{row.department || '—'}</td>
                     <td>{row.position || '—'}</td>
@@ -584,9 +603,15 @@ return (
                         <button className="btn btn-secondary btn-sm" disabled={row.status === 'inactive'} onClick={() => resetPassword(row)}>
                           Reset pw
                         </button>
-                        <button className="btn btn-danger btn-sm" disabled={row.status === 'inactive'} onClick={() => deactivate(row)}>
-                          Deactivate
-                        </button>
+                        {row.status === 'inactive' ? (
+                          <button className="btn btn-success btn-sm" onClick={() => activate(row)}>
+                            Activate
+                          </button>
+                        ) : (
+                          <button className="btn btn-danger btn-sm" onClick={() => deactivate(row)}>
+                            Deactivate
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

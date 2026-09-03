@@ -315,6 +315,7 @@ input:disabled, select:disabled, textarea:disabled {
 .edit-staff-head { margin-bottom: 14px; }
 .edit-staff-head h2 { margin-bottom: 2px; }
 .edit-staff-sub { margin: 0; font-size: 0.88rem; }
+.staff-flag { margin-left: 8px; }
 
 /* ---- Incentive controls (Staff form) ---- */
 .incentive-control { display: flex; align-items: center; gap: 10px; }
