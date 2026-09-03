@@ -51,7 +51,8 @@ export function peso(value) {
 const STATUS_LABELS = {
   no_clock_out: 'No clock out',
   paid_leave: 'Paid leave',
-  self_logged: 'Self logged'
+  self_logged: 'Self logged',
+  rest_day: 'Rest day'
 };
 
 export function StatusBadge({ value }) {

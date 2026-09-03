@@ -145,7 +145,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <td>+ {peso(c.mobileAllowance)}</td>
                     </tr>
                     <tr>
-                      <td>Sunday pay ({peso(c.dailyRate)} × {c.sundayDays} approved Sunday{c.sundayDays === 1 ? '' : 's'})</td>
+                      <td>Rest day pay ({peso(c.dailyRate)} × {c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
                       <td>+ {peso(c.sundayPay)}</td>
                     </tr>
                     <tr>
@@ -220,10 +220,18 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         <td className={d.hours != null && d.hours < 0 ? 'cell-invalid' : ''}>
                           {d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}
                         </td>
-                        <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
                         <td>
-                          {/* Missing clock-out → counts as absent; needs a correction request. */}
-                          {d.status === 'no_clock_out' ? (
+                          {d.workSetup
+                            ? <span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span>
+                            : '—'}
+                        </td>
+                        <td>
+                          {/* Rest day: show whether it was worked (by approved request) or not. */}
+                          {d.status === 'rest_day' ? (
+                            d.timeIn
+                              ? <span className="badge badge-sunday" title="Worked on a rest day">Worked rest day</span>
+                              : <span className="badge badge-rest_day">Rest day</span>
+                          ) : d.status === 'no_clock_out' ? (
                             <span className="badge badge-absent" title="Clocked in but no clock out — file a correction request.">No clock out</span>
                           ) : d.status === 'present' && d.hours != null && d.hours < 0 ? (
                             <span className="badge badge-absent" title="Time out is earlier than time in — please correct this entry.">Invalid time</span>

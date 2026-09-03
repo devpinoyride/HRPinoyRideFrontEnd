@@ -67,7 +67,7 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                     <td>+ {peso(c.mobileAllowance)}</td>
                   </tr>
                   <tr>
-                    <td>Sunday pay ({c.sundayDays} approved Sunday{c.sundayDays === 1 ? '' : 's'})</td>
+                    <td>Rest day pay ({c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
                     <td>+ {peso(c.sundayPay)}</td>
                   </tr>
                   <tr className="netpay">

@@ -48,7 +48,7 @@ export default function BulkAttendancePrint({ payslips, period }) {
                   <td>{fmtISO(d.timeIn)}</td>
                   <td>{fmtISO(d.timeOut)}</td>
                   <td>{d.hours != null ? d.hours + (d.overtimeHours ? ` (+${d.overtimeHours} OT)` : '') : '—'}</td>
-                  <td><span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span></td>
+                  <td>{d.workSetup ? <span className={'badge ' + (d.workSetup === 'wfh' ? 'badge-wfh' : 'badge-office')}>{d.workSetup === 'wfh' ? 'WFH' : 'Office'}</span> : '—'}</td>
                 </tr>
               ))}
             </tbody>
