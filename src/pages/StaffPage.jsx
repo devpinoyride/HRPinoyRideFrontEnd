@@ -572,7 +572,7 @@ return (
             <table className="table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th className="sticky-col">Name</th>
                   <th>Email</th>
                   <th>Department</th>
                   <th>Position</th>
@@ -586,7 +586,7 @@ return (
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className={row.status === 'inactive' ? 'row-inactive' : ''}>
-                    <td>
+                    <td className="sticky-col">
                       {row.fullName}
                       {row.status === 'inactive' ? <span className="badge badge-inactive staff-flag">Inactive</span> : null}
                     </td>

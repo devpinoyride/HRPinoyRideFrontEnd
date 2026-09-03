@@ -217,6 +217,17 @@ input:disabled, select:disabled, textarea:disabled {
 .table-compact td.num, .table-compact th.num { text-align: right; }
 .table tbody tr:hover { background: #f8fafc; }
 .row-inactive { opacity: 0.55; }
+
+/* Sticky first column (e.g. staff Name) — stays pinned while the table scrolls
+   horizontally so you always see which row you're on. Needs an opaque
+   background so scrolling cells don't show through. */
+.table .sticky-col {
+  position: sticky; left: 0; z-index: 2;
+  background: var(--surface);
+  box-shadow: 1px 0 0 var(--border);
+}
+.table thead .sticky-col { background: #f1f3f5; z-index: 3; }
+.table tbody tr:hover .sticky-col { background: #f8fafc; }
 .row-actions { display: flex; gap: 6px; }
 .approve-box { display: flex; flex-direction: column; gap: 8px; min-width: 220px; }
 .approve-actions { display: flex; gap: 6px; }
