@@ -31,6 +31,9 @@ export default function PayrollPage() {
   const [rows, setRows] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [finalized, setFinalized] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
 
   const [exporting, setExporting] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -114,6 +117,7 @@ export default function PayrollPage() {
       const data = await api.payrollSummary({ year: y, month: m, cutoff });
       setRows(data.rows || []);
       setPeriod(data.period || null);
+      setFinalized(!!data.finalized);
     } catch (err) {
       setError(err.message || 'Could not load the payroll summary.');
     } finally {
@@ -124,6 +128,26 @@ export default function PayrollPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const finalizeCutoff = useCallback(async () => {
+    if (!window.confirm(
+      'Finalize this cutoff? This locks and saves every staff payslip as paid. ' +
+      'It CANNOT be reopened — later changes to salary, incentives, or time will not affect this period.'
+    )) return;
+    const [y, m] = month.split('-').map(Number);
+    setFinalizing(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.finalizePayroll({ year: y, month: m, cutoff });
+      setNotice('Cutoff finalized. Payslips for this period are now locked.');
+      await load();
+    } catch (err) {
+      setError(err.message || 'Could not finalize the cutoff.');
+    } finally {
+      setFinalizing(false);
+    }
+  }, [month, cutoff, load]);
 
   const openPayslip = useCallback(async (staffId) => {
     const [y, m] = month.split('-').map(Number);
@@ -156,6 +180,7 @@ export default function PayrollPage() {
       />
 
       {error ? <div className="alert alert-error">{error}</div> : null}
+      {notice ? <div className="alert alert-success">{notice}</div> : null}
 
       <section className="card no-print">
         <form
@@ -190,8 +215,22 @@ export default function PayrollPage() {
 
       <section className="card no-print">
         <div className="section-head">
-          <h2>Payroll summary ({rows.length})</h2>
+          <h2>
+            Payroll summary ({rows.length})
+            {finalized ? <span className="badge badge-active staff-flag">Paid / Finalized</span> : null}
+          </h2>
           <div className="section-actions">
+            {finalized ? null : (
+              <button
+                className="btn btn-primary btn-sm"
+                type="button"
+                onClick={finalizeCutoff}
+                disabled={finalizing || busy || rows.length === 0}
+                title="Lock this cutoff and save all payslips as paid (cannot be reopened)"
+              >
+                {finalizing ? 'Finalizing…' : 'Finalize / Mark as paid'}
+              </button>
+            )}
             <button
               className="btn btn-secondary btn-sm"
               type="button"
