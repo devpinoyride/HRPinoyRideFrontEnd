@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { Field, PageHeader, StatusBadge, fmtISO, hoursBetween, fmtDate } from '../components/ui.jsx';
+import ChangePasswordCard from '../components/ChangePasswordCard.jsx';
 
 const GRACE_PERIOD_MINUTES = 5;
 
@@ -219,6 +220,8 @@ export default function DashboardPage() {
           </div>
         )}
       </section>
+
+      <ChangePasswordCard />
     </>
   );
 }

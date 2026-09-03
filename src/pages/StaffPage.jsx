@@ -199,6 +199,25 @@ export default function StaffPage() {
     }
   }
 
+  async function resetPassword(row) {
+    if (!window.confirm(`Reset password for ${row.fullName}? A new temporary password will be generated to share with them.`)) return;
+    // Generate a readable temp password: PinoyRide + 4 digits + symbol.
+    const temp = `PR-${Math.floor(1000 + Math.random() * 9000)}-${Math.random().toString(36).slice(2, 6)}`;
+    setBusy(true);
+    setError('');
+    setNotice('');
+    setInvited(null);
+    try {
+      const res = await api.resetStaffPassword(row.id, temp);
+      setInvited({ name: res.fullName || row.fullName, email: res.email || row.email, password: temp });
+      setCopied('');
+    } catch (err) {
+      setError(err.message || 'Could not reset the password.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function deactivate(row) {
     if (!window.confirm(`Deactivate ${row.fullName}? They will no longer be able to log in.`)) return;
     setBusy(true);
@@ -224,11 +243,11 @@ return (
       {invited ? (
         <section className="card invite-card">
           <div className="invite-head">
-            <h2>✓ {invited.name} invited</h2>
+            <h2>✓ Credentials for {invited.name}</h2>
             <button className="btn btn-ghost btn-sm" type="button" onClick={() => setInvited(null)}>Dismiss</button>
           </div>
           <p className="muted">
-            No email is sent automatically. Copy these credentials and share them with the new staff member.
+            No email is sent automatically. Copy these credentials and share them with the staff member.
             They can log in and should change the password afterwards.
           </p>
           <div className="cred-row">
@@ -562,6 +581,9 @@ return (
                     <td>
                       <div className="row-actions">
                         <button className="btn btn-secondary btn-sm" onClick={() => startEdit(row)}>Edit</button>
+                        <button className="btn btn-secondary btn-sm" disabled={row.status === 'inactive'} onClick={() => resetPassword(row)}>
+                          Reset pw
+                        </button>
                         <button className="btn btn-danger btn-sm" disabled={row.status === 'inactive'} onClick={() => deactivate(row)}>
                           Deactivate
                         </button>

@@ -126,6 +126,8 @@ export const api = {
   createStaff: (payload) => request('/api/staff', { method: 'POST', body: payload }),
   updateStaff: (id, payload) => request(`/api/staff/${id}`, { method: 'PUT', body: payload }),
   deactivateStaff: (id) => request(`/api/staff/${id}/deactivate`, { method: 'POST' }),
+  resetStaffPassword: (id, newPassword) => request(`/api/staff/${id}/reset-password`, { method: 'POST', body: { newPassword } }),
+  changePassword: (currentPassword, newPassword) => request('/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
 
   reports: (params) => request(`/api/reports${qs(params)}`),
 
