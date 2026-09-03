@@ -2,6 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import { PageHeader, fmtDate, fmtTime } from '../components/ui.jsx';
 
+function leaveDurationLabel(v) {
+  if (v === 'half_am') return 'Half day (AM)';
+  if (v === 'half_pm') return 'Half day (PM)';
+  return 'Whole day';
+}
+
 export default function ApprovalsPage() {
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -78,7 +84,10 @@ export default function ApprovalsPage() {
                     <td>{r.fullName || r.userId}</td>
                     <td>{fmtDate(r.workDate)}</td>
                     <td>{fmtTime(r.requestedTimeIn)} → {fmtTime(r.requestedTimeOut)}</td>
-                    <td>{r.requestType}</td>
+                    <td>
+                      {r.requestType}
+                      {r.requestType === 'leave' && r.leaveDuration ? ` · ${leaveDurationLabel(r.leaveDuration)}` : ''}
+                    </td>
                     <td>{r.reason}</td>
                     <td>
                       {openId === r.id ? (
