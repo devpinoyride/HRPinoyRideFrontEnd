@@ -121,6 +121,12 @@ h2 { font-size: 1.1rem; }
 }
 .section-head h2 { margin: 0; }
 .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.section-search input {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  min-width: 220px;
+}
 
 /* Bulk print containers are hidden on screen; shown only during their print. */
 .bulk-print { display: none; }

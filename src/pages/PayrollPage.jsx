@@ -34,6 +34,7 @@ export default function PayrollPage() {
   const [notice, setNotice] = useState('');
   const [finalized, setFinalized] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
+  const [search, setSearch] = useState('');
 
   const [exporting, setExporting] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -149,6 +150,18 @@ export default function PayrollPage() {
     }
   }, [month, cutoff, load]);
 
+  // Client-side filter over the loaded summary rows. Searching by name /
+  // department / position keeps the payroll table easy to scan for one person.
+  const visibleRows = (() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) =>
+      (r.fullName || '').toLowerCase().includes(q) ||
+      (r.department || '').toLowerCase().includes(q) ||
+      (r.position || '').toLowerCase().includes(q)
+    );
+  })();
+
   const openPayslip = useCallback(async (staffId) => {
     const [y, m] = month.split('-').map(Number);
     setSelectedId(staffId);
@@ -216,9 +229,19 @@ export default function PayrollPage() {
       <section className="card no-print">
         <div className="section-head">
           <h2>
-            Payroll summary ({rows.length})
+            Payroll summary
+            {search.trim() ? ` · "${search.trim()}" (${visibleRows.length})` : ` (${rows.length})`}
             {finalized ? <span className="badge badge-active staff-flag">Paid / Finalized</span> : null}
           </h2>
+          <div className="section-search">
+            <input
+              type="search"
+              placeholder="Search staff by name, department, position…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search payroll staff"
+            />
+          </div>
           <div className="section-actions">
             {finalized ? null : (
               <button
@@ -271,6 +294,8 @@ export default function PayrollPage() {
         </div>
         {rows.length === 0 ? (
           <p className="muted">No staff found.</p>
+        ) : visibleRows.length === 0 ? (
+          <p className="muted">No staff match "{search}".</p>
         ) : (
           <div className="table-wrap">
             <table className="table table-compact">
@@ -289,7 +314,7 @@ export default function PayrollPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {visibleRows.map((r) => (
                   <tr key={r.staffId} className={r.status === 'inactive' ? 'row-inactive' : ''}>
                     <td>{r.fullName}</td>
                     <td>
