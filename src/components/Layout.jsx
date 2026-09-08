@@ -9,14 +9,19 @@ export default function Layout() {
   const isApprover = can('approver');
   const [pendingCount, setPendingCount] = useState(0);
 
-  // Count of pending timekeeping requests assigned to this approver, shown as a
-  // badge on the Approvals nav link. Refetched on navigation so it stays fresh
-  // after approving/rejecting on the Approvals page.
+  // Count of pending timekeeping requests + reimbursements assigned to this
+  // approver, shown as a badge on the Approvals nav link. Refetched on
+  // navigation so it stays fresh after approving/rejecting on the page.
   const loadPending = useCallback(async () => {
     if (!isApprover) return;
     try {
-      const items = await api.approvals();
-      setPendingCount(Array.isArray(items) ? items.length : 0);
+      const [requests, reimbs] = await Promise.all([
+        api.approvals(),
+        api.pendingReimbursements()
+      ]);
+      const n1 = Array.isArray(requests) ? requests.length : 0;
+      const n2 = Array.isArray(reimbs) ? reimbs.length : 0;
+      setPendingCount(n1 + n2);
     } catch {
       /* leave the last known count on transient errors */
     }
