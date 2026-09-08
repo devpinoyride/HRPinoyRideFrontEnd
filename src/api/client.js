@@ -118,6 +118,12 @@ export const api = {
   createRequest: (payload) => request('/api/requests', { method: 'POST', body: payload }),
   myRequests: () => request('/api/requests/mine'),
 
+  createReimbursement: (payload) => request('/api/reimbursements', { method: 'POST', body: payload }),
+  myReimbursements: () => request('/api/reimbursements/mine'),
+  pendingReimbursements: () => request('/api/reimbursements/pending'),
+  approveReimbursement: (id, notes) => request(`/api/reimbursements/${id}/approve`, { method: 'POST', body: { notes } }),
+  rejectReimbursement: (id, notes) => request(`/api/reimbursements/${id}/reject`, { method: 'POST', body: { notes } }),
+
   approvals: () => request('/api/approvals'),
   approve: (id, notes) => request(`/api/approvals/${id}/approve`, { method: 'POST', body: { notes } }),
   reject: (id, notes) => request(`/api/approvals/${id}/reject`, { method: 'POST', body: { notes } }),

@@ -283,6 +283,7 @@ export default function PayrollPage() {
                   <th className="num">Absent</th>
                   <th className="num">Deduction</th>
                   <th className="num">OT pay</th>
+                  <th className="num">Reimb.</th>
                   <th className="num">Net pay</th>
                   <th></th>
                 </tr>
@@ -305,6 +306,7 @@ export default function PayrollPage() {
                     <td className="num">{r.absentDays}</td>
                     <td className="num">{r.absenceDeduction != null ? peso(r.absenceDeduction) : '—'}</td>
                     <td className="num">{r.overtimePay != null ? peso(r.overtimePay) : '—'}</td>
+                    <td className="num">{r.reimbursementTotal != null ? peso(r.reimbursementTotal) : '—'}</td>
                     <td className="num"><strong>{r.netPay != null ? peso(r.netPay) : '—'}</strong></td>
                     <td>
                       <button

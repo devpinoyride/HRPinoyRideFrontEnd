@@ -148,6 +148,14 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <td>Rest day pay ({peso(c.dailyRate)} × {c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
                       <td>+ {peso(c.sundayPay)}</td>
                     </tr>
+                    {c.reimbursements && c.reimbursements.length > 0 ? (
+                      c.reimbursements.map((r, i) => (
+                        <tr key={`reimb-${i}`}>
+                          <td>Reimbursement / incentive · {r.note}</td>
+                          <td>+ {peso(r.amount)}</td>
+                        </tr>
+                      ))
+                    ) : null}
                     <tr>
                       <td>
                         Tardiness / undertime

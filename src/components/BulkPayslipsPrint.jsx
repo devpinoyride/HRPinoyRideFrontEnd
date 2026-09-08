@@ -70,6 +70,14 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                     <td>Rest day pay ({c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
                     <td>+ {peso(c.sundayPay)}</td>
                   </tr>
+                  {c.reimbursements && c.reimbursements.length > 0 ? (
+                    c.reimbursements.map((r, i) => (
+                      <tr key={`reimb-${i}`}>
+                        <td>Reimbursement / incentive · {r.note}</td>
+                        <td>+ {peso(r.amount)}</td>
+                      </tr>
+                    ))
+                  ) : null}
                   <tr className="netpay">
                     <td><strong>NET PAY</strong></td>
                     <td><strong>{peso(c.netPay)}</strong></td>

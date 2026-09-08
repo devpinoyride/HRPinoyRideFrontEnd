@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { api } from '../api/client.js';
-import { Field, PageHeader, StatusBadge, fmtDate, fmtTime } from '../components/ui.jsx';
+import { Field, PageHeader, StatusBadge, fmtDate, fmtTime, fmtISO, peso } from '../components/ui.jsx';
 
 const REQUEST_TYPES = ['adjustment', 'leave', 'overtime', 'other'];
 
@@ -24,6 +24,11 @@ export default function RequestsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+
+  // Reimbursements / additional incentives.
+  const [reimb, setReimb] = useState([]);
+  const [reimbForm, setReimbForm] = useState({ note: '', amount: '' });
+  const [reimbBusy, setReimbBusy] = useState(false);
 
   const [form, setForm] = useState({
     workDate: prefill?.workDate || todayStr(),
@@ -57,6 +62,7 @@ export default function RequestsPage() {
 
   useEffect(() => {
     load();
+    loadReimb();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -88,6 +94,38 @@ export default function RequestsPage() {
       setBusy(false);
     }
   }
+
+  async function onReimbSubmit(e) {
+    e.preventDefault();
+    setReimbBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.createReimbursement({
+        note: reimbForm.note,
+        amount: Number(reimbForm.amount)
+      });
+      setNotice('Reimbursement / incentive submitted for approval.');
+      setReimbForm({ note: '', amount: '' });
+      await loadReimb();
+    } catch (err) {
+      setError(err.message || 'Could not submit your reimbursement.');
+    } finally {
+      setReimbBusy(false);
+    }
+  }
+
+  function setReimbField(name, value) {
+    setReimbForm((f) => ({ ...f, [name]: value }));
+  }
+
+  const loadReimb = useCallback(async () => {
+    try {
+      setReimb(await api.myReimbursements());
+    } catch (err) {
+      setError(err.message || 'Could not load your reimbursements.');
+    }
+  }, []);
 
   return (
     <>
@@ -154,6 +192,27 @@ export default function RequestsPage() {
       </section>
 
       <section className="card">
+        <h2>New reimbursement / incentive</h2>
+        <p className="muted">
+          Reimbursements (e.g. gas, fare, mobile load, meal) or extra incentives are added
+          to your payslip once an approver approves them.
+        </p>
+        <form className="form-grid" onSubmit={onReimbSubmit}>
+          <Field label="Note" hint="What is this reimbursement / incentive for?">
+            <textarea rows={3} required value={reimbForm.note} onChange={(e) => setReimbField('note', e.target.value)} placeholder="e.g. Gas reimbursement for the week" />
+          </Field>
+          <Field label="Amount" hint="Peso value added to your payslip once approved">
+            <input type="number" required min="0.01" step="0.01" value={reimbForm.amount} onChange={(e) => setReimbField('amount', e.target.value)} placeholder="0.00" />
+          </Field>
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit" disabled={reimbBusy}>
+              {reimbBusy ? 'Submitting…' : 'Submit reimbursement'}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card">
         <h2>My request history</h2>
         {mine.length === 0 ? (
           <p className="muted">You have not submitted any requests yet.</p>
@@ -180,6 +239,38 @@ export default function RequestsPage() {
                       {r.requestType === 'leave' && r.leaveDuration ? ` · ${leaveDurationLabel(r.leaveDuration)}` : ''}
                     </td>
                     <td>{r.reason}</td>
+                    <td><StatusBadge value={r.status} /></td>
+                    <td>{r.approverNotes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>My reimbursement &amp; incentive history</h2>
+        {reimb.length === 0 ? (
+          <p className="muted">You have not submitted any reimbursements or incentives yet.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Submitted</th>
+                  <th>Note</th>
+                  <th className="num">Amount</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reimb.map((r) => (
+                  <tr key={r.id}>
+                    <td>{fmtISO(r.createdAt)}</td>
+                    <td>{r.note}</td>
+                    <td className="num">{peso(r.amount)}</td>
                     <td><StatusBadge value={r.status} /></td>
                     <td>{r.approverNotes || '—'}</td>
                   </tr>
