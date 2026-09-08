@@ -1,4 +1,4 @@
-import { peso, fmtDate } from './ui.jsx';
+import { peso, fmtDate, workDayLabel } from './ui.jsx';
 
 function periodLabel(p) {
   if (!p) return '';
@@ -41,7 +41,7 @@ export default function BulkPayslipsPrint({ payslips, period }) {
               <table className="table payslip-computation">
                 <tbody>
                   <tr><td>Salary mode</td><td>{c.salaryMode === 'daily' ? 'Daily (paid per day worked)' : 'Monthly (semi-monthly)'}</td></tr>
-                  <tr><td>Work days</td><td>{c.workDayPattern === 'mon_sat' ? 'Monday – Saturday' : 'Monday – Friday'}</td></tr>
+                  <tr><td>Work days</td><td>{workDayLabel(c.workDayPattern)}</td></tr>
                   <tr><td>Daily rate</td><td>{peso(c.dailyRate)}</td></tr>
                   {c.salaryMode === 'daily' ? (
                     <tr><td>Daily rate × days worked</td><td>{peso(c.semiMonthlyBasic)}</td></tr>

@@ -48,6 +48,28 @@ export function peso(value) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(Number(value));
 }
 
+const WORKDAY_LABELS = {
+  mon_fri: 'Monday – Friday',
+  mon_sat: 'Monday – Saturday',
+  mon_sun: 'Monday – Sunday'
+};
+
+const WORKDAY_SHORT_LABELS = {
+  mon_fri: 'Mon–Fri',
+  mon_sat: 'Mon–Sat',
+  mon_sun: 'Mon–Sun'
+};
+
+// Human-readable label for a staff member's work-day pattern (payroll).
+export function workDayLabel(pattern) {
+  return WORKDAY_LABELS[pattern] || WORKDAY_LABELS.mon_fri;
+}
+
+// Compact "Mon–Fri" / "Mon–Sat" / "Mon–Sun" label used in prose/footnotes.
+export function workDayShortLabel(pattern) {
+  return WORKDAY_SHORT_LABELS[pattern] || WORKDAY_SHORT_LABELS.mon_fri;
+}
+
 const STATUS_LABELS = {
   no_clock_out: 'No clock out',
   paid_leave: 'Paid leave',

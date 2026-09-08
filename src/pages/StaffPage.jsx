@@ -386,6 +386,7 @@ return (
                   <select value={createForm.workDays} onChange={(e) => setCreateField('workDays', e.target.value)}>
                     <option value="mon_fri">Monday – Friday</option>
                     <option value="mon_sat">Monday – Saturday</option>
+                    <option value="mon_sun">Monday – Sunday</option>
                   </select>
                 </Field>
                 <Field label="Schedule time in" hint="Late after this + 15-min grace">
@@ -504,6 +505,7 @@ return (
                   <select value={editForm.workDays} onChange={(e) => setEditField('workDays', e.target.value)}>
                     <option value="mon_fri">Monday – Friday</option>
                     <option value="mon_sat">Monday – Saturday</option>
+                    <option value="mon_sun">Monday – Sunday</option>
                   </select>
                 </Field>
                 <Field label="Schedule time in" hint="Late after this + 15-min grace">

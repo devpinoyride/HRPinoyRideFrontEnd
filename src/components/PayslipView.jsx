@@ -1,5 +1,5 @@
 import { forwardRef, useState } from 'react';
-import { StatusBadge, peso, fmtDate, fmtISO } from './ui.jsx';
+import { StatusBadge, peso, fmtDate, fmtISO, workDayLabel, workDayShortLabel } from './ui.jsx';
 
 function periodLabel(p) {
   if (!p) return '';
@@ -100,7 +100,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                 <table className="table payslip-computation">
                   <tbody>
                     <tr><td>Salary mode</td><td>{c.salaryMode === 'daily' ? 'Daily (paid per day worked)' : (c.fixedSalary ? 'Monthly · Fixed salary (no deductions)' : 'Monthly (semi-monthly)')}</td></tr>
-                    <tr><td>Work days</td><td>{c.workDayPattern === 'mon_sat' ? 'Monday – Saturday' : 'Monday – Friday'}</td></tr>
+                    <tr><td>Work days</td><td>{workDayLabel(c.workDayPattern)}</td></tr>
                     <tr><td>Daily rate</td><td>{peso(c.dailyRate)}</td></tr>
                     {c.salaryMode === 'daily' ? (
                       <tr><td>Daily rate × days worked</td><td>{peso(c.semiMonthlyBasic)}</td></tr>
@@ -173,7 +173,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
               )}
 
               <p className="muted payslip-foot">
-                System-computed from time logs ({c && c.workDayPattern === 'mon_sat' ? 'Mon–Sat' : 'Mon–Fri'} workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·
+                System-computed from time logs ({workDayShortLabel(c && c.workDayPattern)} workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·
                 Generated {new Date().toLocaleString('en-PH')} · Subject to HR validation.
               </p>
             </div>
