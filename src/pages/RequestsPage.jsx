@@ -43,8 +43,9 @@ export default function RequestsPage() {
   const isLeave = form.requestType === 'leave';
   // Adjustment/overtime carry the work setup the approved entry will use.
   const usesWorkSetup = form.requestType === 'adjustment' || form.requestType === 'overtime';
-  // Leave must be filed at least 3 days in advance; other types are for
-  // correcting past/current dates.
+  // Leave must be filed at least 3 days in advance. Adjustment may target any
+  // date (including a future date to pre-schedule time in/out); overtime and
+  // other are for past/current dates.
   const LEAVE_ADVANCE_DAYS = 3;
   const leaveMinDate = (() => {
     const d = new Date();
@@ -146,14 +147,18 @@ export default function RequestsPage() {
           </Field>
           <Field
             label={isLeave ? 'Leave date' : 'Work date'}
-            hint={isLeave ? `Must be filed at least ${LEAVE_ADVANCE_DAYS} days ahead (earliest: ${leaveMinDate})` : undefined}
+            hint={isLeave
+              ? `Must be filed at least ${LEAVE_ADVANCE_DAYS} days ahead (earliest: ${leaveMinDate})`
+              : form.requestType === 'adjustment'
+                ? 'May be a future date — the requested time in/out will be scheduled for that day'
+                : undefined}
           >
             <input
               type="date"
               required
               value={form.workDate}
               min={isLeave ? leaveMinDate : '2020-01-01'}
-              max={isLeave ? undefined : todayStr()}
+              max={isLeave || form.requestType === 'adjustment' ? undefined : todayStr()}
               onChange={(e) => setField('workDate', e.target.value)}
             />
           </Field>
