@@ -30,6 +30,11 @@ export default function RequestsPage() {
   const [reimbForm, setReimbForm] = useState({ note: '', amount: '' });
   const [reimbBusy, setReimbBusy] = useState(false);
 
+  // Cash advances / deductions (SUBTRACTED from the payslip once approved).
+  const [ded, setDed] = useState([]);
+  const [dedForm, setDedForm] = useState({ note: '', amount: '' });
+  const [dedBusy, setDedBusy] = useState(false);
+
   const [form, setForm] = useState({
     workDate: prefill?.workDate || todayStr(),
     requestedTimeIn: '09:00',
@@ -64,6 +69,7 @@ export default function RequestsPage() {
   useEffect(() => {
     load();
     loadReimb();
+    loadDed();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -127,6 +133,38 @@ export default function RequestsPage() {
       setError(err.message || 'Could not load your reimbursements.');
     }
   }, []);
+
+  const loadDed = useCallback(async () => {
+    try {
+      setDed(await api.myDeductions());
+    } catch (err) {
+      setError(err.message || 'Could not load your cash advances.');
+    }
+  }, []);
+
+  function setDedField(name, value) {
+    setDedForm((f) => ({ ...f, [name]: value }));
+  }
+
+  async function onDedSubmit(e) {
+    e.preventDefault();
+    setDedBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await api.createDeduction({
+        note: dedForm.note,
+        amount: Number(dedForm.amount)
+      });
+      setNotice('Cash advance / deduction submitted for approval.');
+      setDedForm({ note: '', amount: '' });
+      await loadDed();
+    } catch (err) {
+      setError(err.message || 'Could not submit your cash advance.');
+    } finally {
+      setDedBusy(false);
+    }
+  }
 
   return (
     <>
@@ -278,6 +316,59 @@ export default function RequestsPage() {
                     <td className="num">{peso(r.amount)}</td>
                     <td><StatusBadge value={r.status} /></td>
                     <td>{r.approverNotes || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>New cash advance / deduction</h2>
+        <p className="muted">
+          Request a cash advance or other deduction. Once an approver approves it, the
+          amount is SUBTRACTED from your payslip for the cutoff in which it was approved.
+        </p>
+        <form className="form-grid" onSubmit={onDedSubmit}>
+          <Field label="Note" hint="What is this cash advance / deduction for?">
+            <textarea rows={3} required value={dedForm.note} onChange={(e) => setDedField('note', e.target.value)} placeholder="e.g. Cash advance for tuition" />
+          </Field>
+          <Field label="Amount" hint="Peso value subtracted from your payslip once approved">
+            <input type="number" required min="0.01" step="0.01" value={dedForm.amount} onChange={(e) => setDedField('amount', e.target.value)} placeholder="0.00" />
+          </Field>
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit" disabled={dedBusy}>
+              {dedBusy ? 'Submitting…' : 'Submit cash advance'}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card">
+        <h2>My cash advance &amp; deduction history</h2>
+        {ded.length === 0 ? (
+          <p className="muted">You have not submitted any cash advances or deductions yet.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Submitted</th>
+                  <th>Note</th>
+                  <th className="num">Amount</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ded.map((d) => (
+                  <tr key={d.id}>
+                    <td>{fmtISO(d.createdAt)}</td>
+                    <td>{d.note}</td>
+                    <td className="num">{peso(d.amount)}</td>
+                    <td><StatusBadge value={d.status} /></td>
+                    <td>{d.approverNotes || '—'}</td>
                   </tr>
                 ))}
               </tbody>

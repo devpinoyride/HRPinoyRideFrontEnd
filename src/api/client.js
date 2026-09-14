@@ -124,6 +124,12 @@ export const api = {
   approveReimbursement: (id, notes) => request(`/api/reimbursements/${id}/approve`, { method: 'POST', body: { notes } }),
   rejectReimbursement: (id, notes) => request(`/api/reimbursements/${id}/reject`, { method: 'POST', body: { notes } }),
 
+  createDeduction: (payload) => request('/api/deductions', { method: 'POST', body: payload }),
+  myDeductions: () => request('/api/deductions/mine'),
+  pendingDeductions: () => request('/api/deductions/pending'),
+  approveDeduction: (id, notes) => request(`/api/deductions/${id}/approve`, { method: 'POST', body: { notes } }),
+  rejectDeduction: (id, notes) => request(`/api/deductions/${id}/reject`, { method: 'POST', body: { notes } }),
+
   approvals: () => request('/api/approvals'),
   approve: (id, notes) => request(`/api/approvals/${id}/approve`, { method: 'POST', body: { notes } }),
   reject: (id, notes) => request(`/api/approvals/${id}/reject`, { method: 'POST', body: { notes } }),

@@ -189,7 +189,7 @@ export default function PayrollPage() {
     <>
       <PageHeader
         title="Payroll"
-        subtitle="Semi-monthly payroll (1–15 and 16–end of month). Net pay = semi-monthly basic − absence deduction + approved overtime."
+        subtitle="Semi-monthly payroll (1–15 and 16–end of month). Net pay = semi-monthly basic − absence deduction + approved overtime + incentives + reimbursements − cash advances."
       />
 
       {error ? <div className="alert alert-error">{error}</div> : null}
@@ -221,7 +221,7 @@ export default function PayrollPage() {
         </form>
         {period ? (
           <p className="muted">
-            Period: {periodLabel(period)} · Monthly: daily rate = basic ÷ 22 · semi-monthly = basic ÷ 2 · Daily mode: paid per day worked at the daily rate (no absence deduction)
+            Period: {periodLabel(period)} · Monthly: daily rate = basic ÷ 22 · semi-monthly = basic ÷ 2 · Daily mode: paid per day worked at the daily rate (no absence deduction) · Approved cash advances are subtracted from net pay
           </p>
         ) : null}
       </section>
@@ -309,6 +309,7 @@ export default function PayrollPage() {
                   <th className="num">Deduction</th>
                   <th className="num">OT pay</th>
                   <th className="num">Reimb.</th>
+                  <th className="num">Cash adv.</th>
                   <th className="num">Net pay</th>
                   <th></th>
                 </tr>
@@ -332,6 +333,7 @@ export default function PayrollPage() {
                     <td className="num">{r.absenceDeduction != null ? peso(r.absenceDeduction) : '—'}</td>
                     <td className="num">{r.overtimePay != null ? peso(r.overtimePay) : '—'}</td>
                     <td className="num">{r.reimbursementTotal != null ? peso(r.reimbursementTotal) : '—'}</td>
+                    <td className="num">{r.deductionTotal != null && r.deductionTotal > 0 ? `− ${peso(r.deductionTotal)}` : '—'}</td>
                     <td className="num"><strong>{r.netPay != null ? peso(r.netPay) : '—'}</strong></td>
                     <td>
                       <button

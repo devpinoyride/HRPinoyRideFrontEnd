@@ -9,8 +9,8 @@ The HR timekeeping portal UI. A separate service that calls the C# API
 |---|---|---|
 | Login | `/login` | everyone |
 | Dashboard (clock in/out, today + week) | `/` | any authenticated user |
-| My Requests (create + list) | `/requests` | any authenticated user |
-| Approvals (pending, approve/reject) | `/approvals` | approver, hr_admin |
+| My Requests (requests + reimbursements + cash advances) | `/requests` | any authenticated user |
+| Approvals (requests, reimbursements, cash advances) | `/approvals` | approver, hr_admin |
 | Reports (summary + CSV export) | `/reports` | approver, hr_admin |
 | Staff management | `/staff` | hr_admin |
 

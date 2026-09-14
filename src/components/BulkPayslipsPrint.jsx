@@ -78,6 +78,14 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                       </tr>
                     ))
                   ) : null}
+                  {c.deductions && c.deductions.length > 0 ? (
+                    c.deductions.map((d, i) => (
+                      <tr key={`ded-${i}`}>
+                        <td>Cash advance / deduction · {d.note}</td>
+                        <td>− {peso(d.amount)}</td>
+                      </tr>
+                    ))
+                  ) : null}
                   <tr className="netpay">
                     <td><strong>NET PAY</strong></td>
                     <td><strong>{peso(c.netPay)}</strong></td>

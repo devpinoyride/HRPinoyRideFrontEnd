@@ -27,10 +27,18 @@ export default function ApprovalsPage() {
   const [reimbNotes, setReimbNotes] = useState('');
   const [confirmReimb, setConfirmReimb] = useState(null);  // { id, action } for reimbursements
 
+  // Pending cash advances / deductions (subtracted from the payslip).
+  const [deds, setDeds] = useState([]);
+  const [dedBusy, setDedBusy] = useState(false);
+  const [dedOpenId, setDedOpenId] = useState(null);
+  const [dedNotes, setDedNotes] = useState('');
+  const [confirmDed, setConfirmDed] = useState(null);      // { id, action } for deductions
+
   const load = useCallback(async () => {
     try {
       setItems(await api.approvals());
       setReimbs(await api.pendingReimbursements());
+      setDeds(await api.pendingDeductions());
       setError('');
     } catch (err) {
       setError(err.message || 'Could not load pending approvals.');
@@ -120,9 +128,48 @@ export default function ApprovalsPage() {
     }
   }
 
+  // Cash advance / deduction equivalent of askReimb — confirm before acting.
+  function askDed(id, action) {
+    if (action === 'reject' && !dedNotes.trim()) {
+      setError('A note is required to reject a cash advance.');
+      return;
+    }
+    setError('');
+    setNotice('');
+    setConfirmDed({ id, action });
+  }
+
+  async function actDed(id, action) {
+    if (action === 'reject' && !dedNotes.trim()) {
+      setError('A note is required to reject a cash advance.');
+      setConfirmDed(null);
+      return;
+    }
+    setDedBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      if (action === 'approve') {
+        await api.approveDeduction(id, dedNotes || '');
+        setNotice('Cash advance approved. The amount will be subtracted from the staff member\'s payslip.');
+      } else {
+        await api.rejectDeduction(id, dedNotes);
+        setNotice('Cash advance rejected and excluded from the payslip.');
+      }
+      setConfirmDed(null);
+      setDedOpenId(null);
+      setDedNotes('');
+      await load();
+    } catch (err) {
+      setError(err.message || `Could not ${action} the cash advance.`);
+    } finally {
+      setDedBusy(false);
+    }
+  }
+
   return (
     <>
-      <PageHeader title="Approvals" subtitle="Pending timekeeping requests and reimbursements assigned to you." />
+      <PageHeader title="Approvals" subtitle="Pending timekeeping requests, reimbursements and cash advances assigned to you." />
 
       {error ? <div className="alert alert-error">{error}</div> : null}
       {notice ? <div className="alert alert-success">{notice}</div> : null}
@@ -281,6 +328,88 @@ export default function ApprovalsPage() {
                         </div>
                       ) : (
                         <button className="btn btn-secondary btn-sm" onClick={() => { setReimbOpenId(r.id); setReimbNotes(''); setConfirmReimb(null); setError(''); }}>
+                          Review
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Pending cash advances &amp; deductions</h2>
+        <p className="muted">
+          Approving SUBTRACTS the amount from the staff member's payslip for the current payoff period.
+        </p>
+        {deds.length === 0 ? (
+          <p className="muted">No pending cash advances right now.</p>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Staff</th>
+                  <th>Submitted</th>
+                  <th>Note</th>
+                  <th className="num">Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deds.map((d) => (
+                  <tr key={d.id}>
+                    <td>{d.fullName || d.userId}</td>
+                    <td>{fmtISO(d.createdAt)}</td>
+                    <td>{d.note}</td>
+                    <td className="num"><strong>{peso(d.amount)}</strong></td>
+                    <td>
+                      {dedOpenId === d.id ? (
+                        <div className="approve-box">
+                          <input
+                            value={dedNotes}
+                            onChange={(e) => setDedNotes(e.target.value)}
+                            placeholder="Note (required to reject)"
+                          />
+                          {confirmDed && confirmDed.id === d.id ? (
+                            <div className={confirmDed.action === 'approve' ? 'alert alert-warning' : 'alert alert-error'}>
+                              <p className="muted">
+                                {confirmDed.action === 'approve'
+                                  ? `Approve this cash advance? ${peso(d.amount)} will be SUBTRACTED from the payslip.`
+                                  : `Reject this cash advance? ${peso(d.amount)} will NOT be subtracted from the payslip.${dedNotes.trim() ? ` Note: “${dedNotes.trim()}” will be saved with it.` : ''}`}
+                              </p>
+                              <div className="approve-actions">
+                                <button
+                                  className={'btn ' + (confirmDed.action === 'approve' ? 'btn-success' : 'btn-danger') + ' btn-sm'}
+                                  disabled={dedBusy}
+                                  onClick={() => actDed(d.id, confirmDed.action)}
+                                >
+                                  Yes, {confirmDed.action}
+                                </button>
+                                <button className="btn btn-ghost btn-sm" disabled={dedBusy} onClick={() => setConfirmDed(null)}>
+                                  No, go back
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="approve-actions">
+                              <button className="btn btn-success btn-sm" disabled={dedBusy} onClick={() => askDed(d.id, 'approve')}>
+                                Approve
+                              </button>
+                              <button className="btn btn-danger btn-sm" disabled={dedBusy} onClick={() => askDed(d.id, 'reject')}>
+                                Reject
+                              </button>
+                              <button className="btn btn-ghost btn-sm" disabled={dedBusy} onClick={() => { setDedOpenId(null); setDedNotes(''); }}>
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <button className="btn btn-secondary btn-sm" onClick={() => { setDedOpenId(d.id); setDedNotes(''); setConfirmDed(null); setError(''); }}>
                           Review
                         </button>
                       )}

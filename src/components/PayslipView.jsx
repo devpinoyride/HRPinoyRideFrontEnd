@@ -156,6 +156,14 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         </tr>
                       ))
                     ) : null}
+                    {c.deductions && c.deductions.length > 0 ? (
+                      c.deductions.map((d, i) => (
+                        <tr key={`ded-${i}`}>
+                          <td>Cash advance / deduction · {d.note}</td>
+                          <td>− {peso(d.amount)}</td>
+                        </tr>
+                      ))
+                    ) : null}
                     <tr>
                       <td>
                         Tardiness / undertime
