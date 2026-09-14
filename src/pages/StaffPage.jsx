@@ -427,13 +427,13 @@ return (
                     <input type="number" min="0" step="0.01" value={createForm.officeIncentiveAmount} disabled={!createForm.officeIncentiveEnabled} onChange={(e) => setCreateField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
                   </div>
                 </Field>
-                <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
+                <Field label="Mobile incentive" hint="Per Sunday in the cutoff (e.g. 2 for the 1st–15th cutoff)">
                   <div className="incentive-control">
                     <label className="incentive-toggle">
                       <input type="checkbox" checked={createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveEnabled', e.target.checked)} />
                       <span>Enabled</span>
                     </label>
-                    <input type="number" min="0" step="0.01" value={createForm.mobileIncentiveAmount} disabled={!createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+                    <input type="number" min="0" step="0.01" value={createForm.mobileIncentiveAmount} disabled={!createForm.mobileIncentiveEnabled} onChange={(e) => setCreateField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / Sunday" />
                   </div>
                 </Field>
               </div>
@@ -546,13 +546,13 @@ return (
                     <input type="number" min="0" step="0.01" value={editForm.officeIncentiveAmount} disabled={!editForm.officeIncentiveEnabled} onChange={(e) => setEditField('officeIncentiveAmount', e.target.value)} placeholder="₱ / office day" />
                   </div>
                 </Field>
-                <Field label="Mobile incentive" hint="Per week (with a workday) in the cutoff">
+                <Field label="Mobile incentive" hint="Per Sunday in the cutoff (e.g. 2 for the 1st–15th cutoff)">
                   <div className="incentive-control">
                     <label className="incentive-toggle">
                       <input type="checkbox" checked={editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveEnabled', e.target.checked)} />
                       <span>Enabled</span>
                     </label>
-                    <input type="number" min="0" step="0.01" value={editForm.mobileIncentiveAmount} disabled={!editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / week" />
+                    <input type="number" min="0" step="0.01" value={editForm.mobileIncentiveAmount} disabled={!editForm.mobileIncentiveEnabled} onChange={(e) => setEditField('mobileIncentiveAmount', e.target.value)} placeholder="₱ / Sunday" />
                   </div>
                 </Field>
               </div>

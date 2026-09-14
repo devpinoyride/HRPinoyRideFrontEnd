@@ -139,7 +139,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <td>
                         Mobile incentive
                         {c.mobileIncentiveEnabled
-                          ? ` (${peso(c.mobileIncentiveRate)} × ${c.mobileIncentiveWeeks} week${c.mobileIncentiveWeeks === 1 ? '' : 's'} worked)`
+                          ? ` (${peso(c.mobileIncentiveRate)} × ${c.mobileIncentiveWeeks} Sunday${c.mobileIncentiveWeeks === 1 ? '' : 's'} in cutoff)`
                           : ' (disabled)'}
                       </td>
                       <td>+ {peso(c.mobileAllowance)}</td>
