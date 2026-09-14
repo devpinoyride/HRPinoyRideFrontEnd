@@ -260,31 +260,6 @@ export default function RequestsPage() {
           </div>
         </form>
       </section>
-      </>
-      )}
-
-      {tab === 'reimb' && (
-      <>
-      <section className="card">
-        <h2>New reimbursement / incentive</h2>
-        <p className="muted">
-          Reimbursements (e.g. gas, fare, mobile load, meal) or extra incentives are added
-          to your payslip once an approver approves them.
-        </p>
-        <form className="form-grid" onSubmit={onReimbSubmit}>
-          <Field label="Note" hint="What is this reimbursement / incentive for?">
-            <textarea rows={3} required value={reimbForm.note} onChange={(e) => setReimbField('note', e.target.value)} placeholder="e.g. Gas reimbursement for the week" />
-          </Field>
-          <Field label="Amount" hint="Peso value added to your payslip once approved">
-            <input type="number" required min="0.01" step="0.01" value={reimbForm.amount} onChange={(e) => setReimbField('amount', e.target.value)} placeholder="0.00" />
-          </Field>
-          <div className="form-actions">
-            <button className="btn btn-primary" type="submit" disabled={reimbBusy}>
-              {reimbBusy ? 'Submitting…' : 'Submit reimbursement'}
-            </button>
-          </div>
-        </form>
-      </section>
 
       <section className="card">
         <h2>My request history</h2>
@@ -321,6 +296,31 @@ export default function RequestsPage() {
             </table>
           </div>
         )}
+      </section>
+      </>
+      )}
+
+      {tab === 'reimb' && (
+      <>
+      <section className="card">
+        <h2>New reimbursement / incentive</h2>
+        <p className="muted">
+          Reimbursements (e.g. gas, fare, mobile load, meal) or extra incentives are added
+          to your payslip once an approver approves them.
+        </p>
+        <form className="form-grid" onSubmit={onReimbSubmit}>
+          <Field label="Note" hint="What is this reimbursement / incentive for?">
+            <textarea rows={3} required value={reimbForm.note} onChange={(e) => setReimbField('note', e.target.value)} placeholder="e.g. Gas reimbursement for the week" />
+          </Field>
+          <Field label="Amount" hint="Peso value added to your payslip once approved">
+            <input type="number" required min="0.01" step="0.01" value={reimbForm.amount} onChange={(e) => setReimbField('amount', e.target.value)} placeholder="0.00" />
+          </Field>
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit" disabled={reimbBusy}>
+              {reimbBusy ? 'Submitting…' : 'Submit reimbursement'}
+            </button>
+          </div>
+        </form>
       </section>
 
       <section className="card">
