@@ -5,6 +5,13 @@ import { Field, PageHeader, StatusBadge, fmtDate, fmtTime, fmtISO, peso } from '
 
 const REQUEST_TYPES = ['adjustment', 'leave', 'overtime', 'other'];
 
+// Tabs on the My Requests page: each tab holds one form plus its history.
+const TABS = [
+  { id: 'request', label: 'New request' },
+  { id: 'reimb', label: 'New reimbursement / incentive' },
+  { id: 'ded', label: 'New cash advance / deduction' }
+];
+
 function leaveDurationLabel(v) {
   if (v === 'half_am') return 'Half day (AM)';
   if (v === 'half_pm') return 'Half day (PM)';
@@ -34,6 +41,9 @@ export default function RequestsPage() {
   const [ded, setDed] = useState([]);
   const [dedForm, setDedForm] = useState({ note: '', amount: '' });
   const [dedBusy, setDedBusy] = useState(false);
+
+  // Tab switcher: which form (and its history table) is displayed.
+  const [tab, setTab] = useState('request');
 
   const [form, setForm] = useState({
     workDate: prefill?.workDate || todayStr(),
@@ -168,11 +178,28 @@ export default function RequestsPage() {
 
   return (
     <>
-      <PageHeader title="My Requests" subtitle="Submit time adjustments, leaves or overtime requests." />
+      <PageHeader title="My Requests" subtitle="Submit time adjustments, leaves, overtime, reimbursements and cash advances." />
 
       {error ? <div className="alert alert-error">{error}</div> : null}
       {notice ? <div className="alert alert-success">{notice}</div> : null}
 
+      <div className="tabs" role="tablist" aria-label="Request forms">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={'tab' + (tab === t.id ? ' active' : '')}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'request' && (
+      <>
       <section className="card">
         <h2>New request</h2>
         <form className="form-grid" onSubmit={onSubmit}>
@@ -233,7 +260,11 @@ export default function RequestsPage() {
           </div>
         </form>
       </section>
+      </>
+      )}
 
+      {tab === 'reimb' && (
+      <>
       <section className="card">
         <h2>New reimbursement / incentive</h2>
         <p className="muted">
@@ -323,7 +354,11 @@ export default function RequestsPage() {
           </div>
         )}
       </section>
+      </>
+      )}
 
+      {tab === 'ded' && (
+      <>
       <section className="card">
         <h2>New cash advance / deduction</h2>
         <p className="muted">
@@ -376,6 +411,8 @@ export default function RequestsPage() {
           </div>
         )}
       </section>
+      </>
+      )}
     </>
   );
 }

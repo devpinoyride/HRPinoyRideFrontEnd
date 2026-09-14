@@ -249,6 +249,26 @@ input:disabled, select:disabled, textarea:disabled {
 .badge-self_logged { background: #ede9fe; color: #5b21b6; }
 .badge-adjusted { background: #cffafe; color: #155e75; }
 .badge-orange { background: #ffedd5; color: #9a3412; }
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  border-bottom: 2px solid var(--border); margin-bottom: 16px;
+}
+.tab {
+  appearance: none; border: none; background: transparent; cursor: pointer;
+  font: inherit; font-weight: 600; color: var(--muted);
+  padding: 10px 16px; margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.tab:hover { color: var(--text); background: rgba(245, 166, 35, 0.08); }
+.tab.active {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary);
+  background: rgba(245, 166, 35, 0.1);
+}
+
+/* ---------- Login ---------- */
 
 /* ---------- Login ---------- */
 .login-page {
