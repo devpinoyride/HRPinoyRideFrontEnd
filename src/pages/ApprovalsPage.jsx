@@ -15,12 +15,17 @@ export default function ApprovalsPage() {
   const [notice, setNotice] = useState('');
   const [openId, setOpenId] = useState(null);
   const [notes, setNotes] = useState('');
+  // Two-step guard before any approve/reject fires, so a note typed for one
+  // action can't be silently attached to the other (both buttons used to sit
+  // side by side and acted immediately).
+  const [confirm, setConfirm] = useState(null);            // { id, action } for timekeeping requests
 
   // Pending reimbursements / additional incentives.
   const [reimbs, setReimbs] = useState([]);
   const [reimbBusy, setReimbBusy] = useState(false);
   const [reimbOpenId, setReimbOpenId] = useState(null);
   const [reimbNotes, setReimbNotes] = useState('');
+  const [confirmReimb, setConfirmReimb] = useState(null);  // { id, action } for reimbursements
 
   const load = useCallback(async () => {
     try {
@@ -36,9 +41,22 @@ export default function ApprovalsPage() {
     load();
   }, [load]);
 
+  // First step: validate the note and show a confirmation prompt for the chosen
+  // action. The actual API call only happens after the user confirms it.
+  function askAct(id, action) {
+    if (action === 'reject' && !notes.trim()) {
+      setError('A note is required to reject a request.');
+      return;
+    }
+    setError('');
+    setNotice('');
+    setConfirm({ id, action });
+  }
+
   async function act(id, action) {
     if (action === 'reject' && !notes.trim()) {
       setError('A note is required to reject a request.');
+      setConfirm(null);
       return;
     }
     setBusy(true);
@@ -52,6 +70,7 @@ export default function ApprovalsPage() {
         await api.reject(id, notes);
         setNotice('Request rejected.');
       }
+      setConfirm(null);
       setOpenId(null);
       setNotes('');
       await load();
@@ -62,9 +81,21 @@ export default function ApprovalsPage() {
     }
   }
 
+  // Reimbursement equivalent of askAct — confirm between "Approve" and "Reject".
+  function askReimb(id, action) {
+    if (action === 'reject' && !reimbNotes.trim()) {
+      setError('A note is required to reject a reimbursement.');
+      return;
+    }
+    setError('');
+    setNotice('');
+    setConfirmReimb({ id, action });
+  }
+
   async function actReimb(id, action) {
     if (action === 'reject' && !reimbNotes.trim()) {
       setError('A note is required to reject a reimbursement.');
+      setConfirmReimb(null);
       return;
     }
     setReimbBusy(true);
@@ -76,8 +107,9 @@ export default function ApprovalsPage() {
         setNotice('Reimbursement approved. The amount will be added to the staff member\'s payslip.');
       } else {
         await api.rejectReimbursement(id, reimbNotes);
-        setNotice('Reimbursement rejected.');
+        setNotice('Reimbursement rejected and excluded from the payslip.');
       }
+      setConfirmReimb(null);
       setReimbOpenId(null);
       setReimbNotes('');
       await load();
@@ -131,20 +163,42 @@ export default function ApprovalsPage() {
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Note (required to reject)"
                           />
-                          <div className="approve-actions">
-                            <button className="btn btn-success btn-sm" disabled={busy} onClick={() => act(r.id, 'approve')}>
-                              Approve
-                            </button>
-                            <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => act(r.id, 'reject')}>
-                              Reject
-                            </button>
-                            <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => { setOpenId(null); setNotes(''); }}>
-                              Cancel
-                            </button>
-                          </div>
+                          {confirm && confirm.id === r.id ? (
+                            <div className={confirm.action === 'approve' ? 'alert alert-warning' : 'alert alert-error'}>
+                              <p className="muted">
+                                {confirm.action === 'approve'
+                                  ? 'Approve this request? The time entry will be adjusted to the requested times.'
+                                  : `Reject this request? It will NOT change any time entry.${notes.trim() ? ` Note: “${notes.trim()}” will be saved with it.` : ''}`}
+                              </p>
+                              <div className="approve-actions">
+                                <button
+                                  className={'btn ' + (confirm.action === 'approve' ? 'btn-success' : 'btn-danger') + ' btn-sm'}
+                                  disabled={busy}
+                                  onClick={() => act(r.id, confirm.action)}
+                                >
+                                  Yes, {confirm.action}
+                                </button>
+                                <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => setConfirm(null)}>
+                                  No, go back
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="approve-actions">
+                              <button className="btn btn-success btn-sm" disabled={busy} onClick={() => askAct(r.id, 'approve')}>
+                                Approve
+                              </button>
+                              <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => askAct(r.id, 'reject')}>
+                                Reject
+                              </button>
+                              <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => { setOpenId(null); setNotes(''); }}>
+                                Cancel
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <button className="btn btn-secondary btn-sm" onClick={() => { setOpenId(r.id); setNotes(''); setError(''); }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => { setOpenId(r.id); setNotes(''); setConfirm(null); setError(''); }}>
                           Review
                         </button>
                       )}
@@ -191,20 +245,42 @@ export default function ApprovalsPage() {
                             onChange={(e) => setReimbNotes(e.target.value)}
                             placeholder="Note (required to reject)"
                           />
-                          <div className="approve-actions">
-                            <button className="btn btn-success btn-sm" disabled={reimbBusy} onClick={() => actReimb(r.id, 'approve')}>
-                              Approve
-                            </button>
-                            <button className="btn btn-danger btn-sm" disabled={reimbBusy} onClick={() => actReimb(r.id, 'reject')}>
-                              Reject
-                            </button>
-                            <button className="btn btn-ghost btn-sm" disabled={reimbBusy} onClick={() => { setReimbOpenId(null); setReimbNotes(''); }}>
-                              Cancel
-                            </button>
-                          </div>
+                          {confirmReimb && confirmReimb.id === r.id ? (
+                            <div className={confirmReimb.action === 'approve' ? 'alert alert-warning' : 'alert alert-error'}>
+                              <p className="muted">
+                                {confirmReimb.action === 'approve'
+                                  ? `Approve this reimbursement? ${peso(r.amount)} will be added to the payslip.`
+                                  : `Reject this reimbursement? ${peso(r.amount)} will NOT be added to the payslip.${reimbNotes.trim() ? ` Note: “${reimbNotes.trim()}” will be saved with it.` : ''}`}
+                              </p>
+                              <div className="approve-actions">
+                                <button
+                                  className={'btn ' + (confirmReimb.action === 'approve' ? 'btn-success' : 'btn-danger') + ' btn-sm'}
+                                  disabled={reimbBusy}
+                                  onClick={() => actReimb(r.id, confirmReimb.action)}
+                                >
+                                  Yes, {confirmReimb.action}
+                                </button>
+                                <button className="btn btn-ghost btn-sm" disabled={reimbBusy} onClick={() => setConfirmReimb(null)}>
+                                  No, go back
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="approve-actions">
+                              <button className="btn btn-success btn-sm" disabled={reimbBusy} onClick={() => askReimb(r.id, 'approve')}>
+                                Approve
+                              </button>
+                              <button className="btn btn-danger btn-sm" disabled={reimbBusy} onClick={() => askReimb(r.id, 'reject')}>
+                                Reject
+                              </button>
+                              <button className="btn btn-ghost btn-sm" disabled={reimbBusy} onClick={() => { setReimbOpenId(null); setReimbNotes(''); }}>
+                                Cancel
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
-                        <button className="btn btn-secondary btn-sm" onClick={() => { setReimbOpenId(r.id); setReimbNotes(''); setError(''); }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => { setReimbOpenId(r.id); setReimbNotes(''); setConfirmReimb(null); setError(''); }}>
                           Review
                         </button>
                       )}
