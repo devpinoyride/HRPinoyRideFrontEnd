@@ -7,9 +7,9 @@ const REQUEST_TYPES = ['adjustment', 'leave', 'overtime', 'other'];
 
 // Tabs on the My Requests page: each tab holds one form plus its history.
 const TABS = [
-  { id: 'request', label: 'New request' },
-  { id: 'reimb', label: 'New reimbursement / incentive' },
-  { id: 'ded', label: 'New cash advance / deduction' }
+  { id: 'request', label: 'Timekeeping request' },
+  { id: 'reimb', label: 'Reimbursement / incentive' },
+  { id: 'ded', label: 'Cash advance / deduction' }
 ];
 
 function leaveDurationLabel(v) {
@@ -201,7 +201,7 @@ export default function RequestsPage() {
       {tab === 'request' && (
       <>
       <section className="card">
-        <h2>New request</h2>
+        <h2>New timekeeping request</h2>
         <form className="form-grid" onSubmit={onSubmit}>
           <Field label="Type">
             <select value={form.requestType} onChange={(e) => setField('requestType', e.target.value)}>
@@ -262,9 +262,9 @@ export default function RequestsPage() {
       </section>
 
       <section className="card">
-        <h2>My request history</h2>
+        <h2>My timekeeping request history</h2>
         {mine.length === 0 ? (
-          <p className="muted">You have not submitted any requests yet.</p>
+          <p className="muted">You have not submitted any timekeeping requests yet.</p>
         ) : (
           <div className="table-wrap">
             <table className="table">
