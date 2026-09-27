@@ -22,7 +22,8 @@ export default function BulkAttendancePrint({ payslips, period }) {
             <div>
               <h2>Attendance detail</h2>
               <p className="muted">
-                {slip.staff.fullName} · {periodLabel(slip.period || period)}
+                {/* Bold the name so it's obvious whose attendance page this is. */}
+                <strong>{slip.staff.fullName}</strong> · {periodLabel(slip.period || period)}
               </p>
             </div>
           </div>

@@ -223,7 +223,8 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
               <div className="attendance-head">
                 <h3>Attendance detail</h3>
                 <p className="muted">
-                  {payslip.staff.fullName} · {periodLabel(payslip.period)}
+                  {/* Bold the name so it's obvious whose attendance page this is. */}
+                  <strong>{payslip.staff.fullName}</strong> · {periodLabel(payslip.period)}
                 </p>
               </div>
 
