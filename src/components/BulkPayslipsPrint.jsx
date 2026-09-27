@@ -53,10 +53,18 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                   )}
                   <tr><td>Workdays in period</td><td>{c.workdays}</td></tr>
                   <tr><td>Days worked</td><td>{c.workedDays}</td></tr>
-                  <tr><td>Paid leave days</td><td>{c.paidLeaveDays}</td></tr>
-                  <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
-                  <tr><td>Absence deduction</td><td>− {peso(c.absenceDeduction)}</td></tr>
-                  <tr><td>Overtime hours</td><td>{c.overtimeHours}</td></tr>
+                  {hasAmount(c.paidLeaveDays) ? (
+                    <tr><td>Paid leave days</td><td>{c.paidLeaveDays}</td></tr>
+                  ) : null}
+                  {hasAmount(c.absentDays) ? (
+                    <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
+                  ) : null}
+                  {hasAmount(c.absenceDeduction) ? (
+                    <tr><td>Absence deduction</td><td>− {peso(c.absenceDeduction)}</td></tr>
+                  ) : null}
+                  {hasAmount(c.overtimeHours) ? (
+                    <tr><td>Overtime hours</td><td>{c.overtimeHours}</td></tr>
+                  ) : null}
                   {/* Money lines render only when they actually move the pay, matching
                       the on-screen payslip (and the single-payslip PDF export). */}
                   {hasAmount(c.overtimePay) ? (

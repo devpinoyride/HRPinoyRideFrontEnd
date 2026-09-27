@@ -112,16 +112,24 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                     )}
                     <tr><td>Workdays in period</td><td>{c.workdays}</td></tr>
                     <tr><td>Days worked</td><td>{c.workedDays}</td></tr>
-                    <tr><td>Paid leave days</td><td>{c.paidLeaveDays}</td></tr>
-                    <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
-                    {c.salaryMode === 'daily' ? (
-                      <tr><td>Absence deduction</td><td>— (none in daily mode)</td></tr>
-                    ) : c.fixedSalary ? (
-                      <tr><td>Absence deduction</td><td>— (fixed salary)</td></tr>
-                    ) : (
-                      <tr><td>Absence deduction ({c.absentDays} × {peso(c.dailyRate)})</td><td>− {peso(c.absenceDeduction)}</td></tr>
-                    )}
-                    <tr><td>Overtime hours (approved OT, beyond 8h/day)</td><td>{c.overtimeHours}</td></tr>
+                    {hasAmount(c.paidLeaveDays) ? (
+                      <tr><td>Paid leave days</td><td>{c.paidLeaveDays}</td></tr>
+                    ) : null}
+                    {hasAmount(c.absentDays) ? (
+                      <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
+                    ) : null}
+                    {hasAmount(c.absenceDeduction) ? (
+                      c.salaryMode === 'daily' ? (
+                        <tr><td>Absence deduction</td><td>— (none in daily mode)</td></tr>
+                      ) : c.fixedSalary ? (
+                        <tr><td>Absence deduction</td><td>— (fixed salary)</td></tr>
+                      ) : (
+                        <tr><td>Absence deduction ({c.absentDays} × {peso(c.dailyRate)})</td><td>− {peso(c.absenceDeduction)}</td></tr>
+                      )
+                    ) : null}
+                    {hasAmount(c.overtimeHours) ? (
+                      <tr><td>Overtime hours (approved OT, beyond 8h/day)</td><td>{c.overtimeHours}</td></tr>
+                    ) : null}
                     {hasAmount(c.overtimePay) ? (
                       <tr>
                         <td>Overtime pay ({c.overtimeHours} × hourly {peso(c.dailyRate / 8)} × 1.25)</td>
