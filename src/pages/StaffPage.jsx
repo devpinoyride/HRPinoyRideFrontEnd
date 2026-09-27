@@ -4,6 +4,10 @@ import { Field, PageHeader, StatusBadge, peso } from '../components/ui.jsx';
 
 const ROLES = ['employee', 'approver', 'hr_admin'];
 
+// Fixed department list. Kept in one place so the Edit form and anything that
+// validates against it cannot drift apart.
+const DEPARTMENTS = ['IT', 'Operations', 'HR'];
+
 export default function StaffPage() {
   const [rows, setRows] = useState([]);
   const [filters, setFilters] = useState({ q: '', role: '', status: '' });
@@ -88,6 +92,13 @@ export default function StaffPage() {
     setEditForm((f) => ({ ...f, [name]: value }));
   }
 
+  // A department already stored that isn't one of the three options. The select
+  // can't represent it, so we surface it as a hint instead of silently dropping it.
+  const legacyDepartment =
+    editingStaff && editingStaff.department && !DEPARTMENTS.includes(editingStaff.department)
+      ? editingStaff.department
+      : null;
+
   async function copyText(text, key) {
     try {
       await navigator.clipboard.writeText(text);
@@ -146,7 +157,9 @@ export default function StaffPage() {
     setEditingStaff(row);
     setEditTab('profile');
     setEditForm({
-      department: row.department || '',
+      // Legacy/typo departments (e.g. "Human Resources", "Finance") are not in
+      // DEPARTMENTS, so the select falls back to blank and HR picks a valid one.
+      department: DEPARTMENTS.includes(row.department) ? row.department : '',
       position: row.position || '',
       role: row.role || 'employee',
       approverId: row.approverId || '',
@@ -467,8 +480,16 @@ return (
           <form onSubmit={submitEdit}>
             {editTab === 'profile' ? (
               <div className="form-grid">
-                <Field label="Department">
-                  <input type="text" value={editForm.department} onChange={(e) => setEditField('department', e.target.value)} />
+                <Field
+                  label="Department"
+                  hint={legacyDepartment ? `Saved as "${legacyDepartment}" — pick one of the three options; saving will replace it.` : undefined}
+                >
+                  <select value={editForm.department} onChange={(e) => setEditField('department', e.target.value)}>
+                    <option value="">Select department</option>
+                    {DEPARTMENTS.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </Field>
                 <Field label="Position">
                   <input type="text" value={editForm.position} onChange={(e) => setEditField('position', e.target.value)} />
