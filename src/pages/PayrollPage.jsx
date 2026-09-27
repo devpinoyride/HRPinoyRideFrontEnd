@@ -53,7 +53,7 @@ export default function PayrollPage() {
     try {
       await api.exportPayroll({ year: y, month: m, cutoff });
     } catch (err) {
-      setError(err.message || 'Could not export the payslips CSV.');
+      setError(err.message || 'Could not export the payslip summary.');
     } finally {
       setExporting(false);
     }
@@ -268,9 +268,9 @@ export default function PayrollPage() {
               type="button"
               onClick={exportPayrollCsv}
               disabled={exporting || busy || rows.length === 0}
-              title="Download all staff payroll for this cutoff as CSV"
+              title="Download a printable payslip summary table for this cutoff (open and print to PDF)"
             >
-              Payslips CSV
+              Payslip Summary
             </button>
             <button
               className="btn btn-secondary btn-sm"
