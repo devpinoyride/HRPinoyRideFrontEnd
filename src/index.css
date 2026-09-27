@@ -207,6 +207,10 @@ input:disabled, select:disabled, textarea:disabled {
 
 /* ---------- Tables ---------- */
 .table-wrap { overflow-x: auto; }
+/* Opt-in bounded height so a long table scrolls internally and a sticky header
+   has something to stick against. Generous enough that short lists never show a
+   scrollbar. Applied only where a scrolling table is wanted. */
+.table-wrap-scroll { max-height: 70vh; overflow: auto; }
 .table { width: 100%; border-collapse: collapse; }
 .table th, .table td {
   text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border);
@@ -221,6 +225,24 @@ input:disabled, select:disabled, textarea:disabled {
 }
 .table-compact th { font-size: 0.68rem; letter-spacing: 0.02em; }
 .table-compact td.num, .table-compact th.num { text-align: right; }
+
+/* Header row of the dense payroll summary: the body is small and dense, so the
+   header needs extra weight/space to stay readable. Bold + opaque light-gray
+   fill + a heavier rule than the 1px row dividers. Sticky so the columns stay
+   identified while scrolling a long staff list (needs a scrollable wrapper —
+   see .table-wrap-scroll). The opaque background is required so rows scrolling
+   underneath don't show through. */
+.table-compact thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: #f8fafc;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 10px 8px;
+  border-bottom: 2px solid var(--border);
+}
+
 .table tbody tr:hover { background: #f8fafc; }
 .row-inactive { opacity: 0.55; }
 

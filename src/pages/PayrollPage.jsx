@@ -297,20 +297,23 @@ export default function PayrollPage() {
         ) : visibleRows.length === 0 ? (
           <p className="muted">No staff match "{search}".</p>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap table-wrap-scroll">
             <table className="table table-compact">
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Mode</th>
-                  <th className="num">Basic</th>
-                  <th className="num">Days</th>
-                  <th className="num">Absent</th>
-                  <th className="num">Deduction</th>
-                  <th className="num">OT pay</th>
-                  <th className="num">Reimb.</th>
-                  <th className="num">Cash adv.</th>
-                  <th className="num">Net pay</th>
+                  {/* Numeric headers right-align to match the values below
+                      (th.num). Full terms ride on title= so the visible labels
+                      stay short and the table doesn't get any wider. */}
+                  <th className="num" title="Monthly basic salary">Basic</th>
+                  <th className="num" title="Days worked / workdays in period">Days</th>
+                  <th className="num" title="Absent days">Absent</th>
+                  <th className="num" title="Absence deduction">Deduction</th>
+                  <th className="num" title="Overtime pay">OT pay</th>
+                  <th className="num" title="Approved reimbursements / additional incentives">Reimb.</th>
+                  <th className="num" title="Approved cash advances / deductions">Cash adv.</th>
+                  <th className="num" title="Net pay for this cutoff">Net pay</th>
                   <th></th>
                 </tr>
               </thead>
