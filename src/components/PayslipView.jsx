@@ -30,7 +30,8 @@ function printSection(sectionClass) {
  */
 const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, error, onChanged }, ref) {
   const [tab, setTab] = useState('payslip');
-  // HR-admin-only: cancel all or part of an approved cash advance / deduction.
+  // HR-admin-only: cancel all or part of an approved reimbursement or deduction.
+  // `kind` picks the endpoint and the wording shown in the confirm dialog.
   const { can } = useAuth();
   const canCancel = can('hr_admin');
   const [cancelTarget, setCancelTarget] = useState(null);
@@ -43,10 +44,16 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
   // and need correction — their tardiness is excluded from the deduction.
   const invalidDays = (payslip?.days || []).filter((d) => d.status === 'present' && d.hours != null && d.hours < 0);
 
-  function openCancel(d) {
-    setCancelTarget(d);
+  const CANCEL_KINDS = {
+    deduction: { label: 'Cash advance / deduction', verb: 'deduction' },
+    reimbursement: { label: 'Reimbursement / incentive', verb: 'reimbursement' }
+  };
+  const cancelKind = cancelTarget ? CANCEL_KINDS[cancelTarget.kind] : null;
+
+  function openCancel(kind, line) {
+    setCancelTarget({ kind, line });
     // Default to the full remaining amount; HR can lower it for a partial cancel.
-    setCancelAmount(String(d.amount ?? ''));
+    setCancelAmount(String(line.amount ?? ''));
     setCancelNote('');
     setCancelError('');
   }
@@ -61,8 +68,9 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
 
   async function confirmCancel() {
     if (!cancelTarget) return;
+    const { kind, line } = cancelTarget;
     const amount = Number(cancelAmount);
-    const remaining = Number(cancelTarget.amount ?? 0);
+    const remaining = Number(line.amount ?? 0);
 
     // Client-side mirror of the server rules; the API re-validates anyway.
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -70,21 +78,25 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
       return;
     }
     if (amount > remaining) {
-      setCancelError(`You can cancel at most ${peso(remaining)} of this deduction.`);
+      setCancelError(`You can cancel at most ${peso(remaining)} of this ${CANCEL_KINDS[kind].verb}.`);
       return;
     }
 
     setCancelBusy(true);
     setCancelError('');
     try {
-      await api.cancelDeduction(cancelTarget.id, amount, cancelNote.trim() || undefined);
+      if (kind === 'reimbursement') {
+        await api.cancelReimbursement(line.id, amount, cancelNote.trim() || undefined);
+      } else {
+        await api.cancelDeduction(line.id, amount, cancelNote.trim() || undefined);
+      }
       setCancelTarget(null);
       setCancelAmount('');
       setCancelNote('');
-      // Net pay and the deduction line change server-side; refetch the payslip.
+      // Net pay and the line change server-side; refetch the payslip.
       if (onChanged) await onChanged();
     } catch (err) {
-      setCancelError(err.message || 'Could not cancel this deduction.');
+      setCancelError(err.message || `Could not cancel this ${CANCEL_KINDS[kind].verb}.`);
     } finally {
       setCancelBusy(false);
     }
@@ -221,11 +233,30 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         <td>+ {peso(c.sundayPay)}</td>
                       </tr>
                     ) : null}
-                    {/* Reimbursements and cash advances: hide individual ₱0.00 lines,
-                        keeping the rest so a mixed list still shows its real entries. */}
+                    {/* Reimbursements and cash advances: `amount` is the REMAINING
+                        figure, so a fully cancelled line is already hidden by
+                        hasAmount. The Cancel control is HR-admin only, never prints,
+                        and each partial cancel is annotated in the note. */}
                     {(c.reimbursements || []).filter((r) => hasAmount(r.amount)).map((r, i) => (
-                      <tr key={`reimb-${i}`}>
-                        <td>Reimbursement / incentive · {r.note}</td>
+                      <tr key={r.id ?? `reimb-${i}`}>
+                        <td>
+                          Reimbursement / incentive · {r.note}
+                          {r.cancelledAmount ? (
+                            <span className="ded-cancelled-note">
+                              {' '}({peso(r.cancelledAmount)} cancelled{r.cancelledByName ? ` by ${r.cancelledByName}` : ''})
+                            </span>
+                          ) : null}
+                          {canCancel ? (
+                            <button
+                              type="button"
+                              className="link-btn no-print"
+                              onClick={() => openCancel('reimbursement', r)}
+                              title={`Cancel part or all of this reimbursement (${peso(r.amount)} remaining)`}
+                            >
+                              Cancel
+                            </button>
+                          ) : null}
+                        </td>
                         <td>+ {peso(r.amount)}</td>
                       </tr>
                     ))}
@@ -245,7 +276,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                             <button
                               type="button"
                               className="link-btn no-print"
-                              onClick={() => openCancel(d)}
+                              onClick={() => openCancel('deduction', d)}
                               title={`Cancel part or all of this deduction (${peso(d.amount)} remaining)`}
                             >
                               Cancel
@@ -283,14 +314,14 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
 
               {/* HR-admin-only confirm step: nothing is applied without it. */}
               {cancelTarget ? (
-                <div className="modal-backdrop no-print" role="dialog" aria-modal="true" aria-label="Cancel deduction">
+                <div className="modal-backdrop no-print" role="dialog" aria-modal="true" aria-label="Cancel request">
                   <div className="modal">
-                    <h3>Cancel deduction</h3>
+                    <h3>Cancel {cancelKind.verb}</h3>
                     <p className="muted">
-                      Cash advance / deduction · {cancelTarget.note}
+                      {cancelKind.label} · {cancelTarget.line.note}
                       <br />
-                      Approved {peso(cancelTarget.originalAmount ?? cancelTarget.amount)} · remaining{' '}
-                      <strong>{peso(cancelTarget.amount)}</strong>
+                      Approved {peso(cancelTarget.line.originalAmount ?? cancelTarget.line.amount)} · remaining{' '}
+                      <strong>{peso(cancelTarget.line.amount)}</strong>
                     </p>
 
                     <label className="field">
@@ -304,7 +335,7 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         autoFocus
                       />
                       <span className="field-hint">
-                        Full or partial. Enter {peso(cancelTarget.amount)} to cancel the whole remaining amount.
+                        Full or partial. Enter {peso(cancelTarget.line.amount)} to cancel the whole remaining amount.
                       </span>
                     </label>
 

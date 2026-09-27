@@ -89,8 +89,15 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                     </tr>
                   ) : null}
                   {(c.reimbursements || []).filter((r) => hasAmount(r.amount)).map((r, i) => (
-                    <tr key={`reimb-${i}`}>
-                      <td>Reimbursement / incentive · {r.note}</td>
+                    <tr key={r.id ?? `reimb-${i}`}>
+                      <td>
+                        Reimbursement / incentive · {r.note}
+                        {r.cancelledAmount ? (
+                          <span className="ded-cancelled-note">
+                            {' '}({peso(r.cancelledAmount)} cancelled{r.cancelledByName ? ` by ${r.cancelledByName}` : ''})
+                          </span>
+                        ) : null}
+                      </td>
                       <td>+ {peso(r.amount)}</td>
                     </tr>
                   ))}

@@ -123,6 +123,8 @@ export const api = {
   pendingReimbursements: () => request('/api/reimbursements/pending'),
   approveReimbursement: (id, notes) => request(`/api/reimbursements/${id}/approve`, { method: 'POST', body: { notes } }),
   rejectReimbursement: (id, notes) => request(`/api/reimbursements/${id}/reject`, { method: 'POST', body: { notes } }),
+  // HR admin only: cancel all or part of an approved reimbursement.
+  cancelReimbursement: (id, amount, note) => request(`/api/reimbursements/${id}/cancel`, { method: 'POST', body: { amount, note } }),
 
   createDeduction: (payload) => request('/api/deductions', { method: 'POST', body: payload }),
   myDeductions: () => request('/api/deductions/mine'),
