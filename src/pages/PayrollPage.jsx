@@ -268,9 +268,9 @@ export default function PayrollPage() {
               type="button"
               onClick={exportPayrollCsv}
               disabled={exporting || busy || rows.length === 0}
-              title="Download a printable payslip summary table for this cutoff (open and print to PDF)"
+              title="Download the payslip summary for this cutoff as a printable PDF"
             >
-              Payslip Summary
+              Payslip Summary PDF
             </button>
             <button
               className="btn btn-secondary btn-sm"

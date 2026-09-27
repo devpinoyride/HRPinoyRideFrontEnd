@@ -147,7 +147,7 @@ export const api = {
   payrollSummary: (params) => request(`/api/payroll/summary${qs(params)}`),
   finalizePayroll: (params) => request(`/api/payroll/finalize${qs(params)}`, { method: 'POST' }),
   payslip: (params) => request(`/api/payroll/payslip${qs(params)}`),
-  exportPayroll: (params) => downloadCsv(`/api/payroll/export${qs(params)}`, 'payroll.html'),
+  exportPayroll: (params) => downloadCsv(`/api/payroll/export${qs(params)}`, 'payroll.pdf'),
   exportAttendance: (params) => downloadCsv(`/api/payroll/attendance-export${qs(params)}`, 'attendance.csv'),
   downloadReport: (params) => downloadCsv(`/api/reports/export${qs(params)}`, 'reports.csv')
 };
