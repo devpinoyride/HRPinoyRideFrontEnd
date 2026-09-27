@@ -1,4 +1,4 @@
-import { peso, fmtDate, workDayLabel } from './ui.jsx';
+import { peso, hasAmount, fmtDate, workDayLabel } from './ui.jsx';
 
 function periodLabel(p) {
   if (!p) return '';
@@ -57,35 +57,41 @@ export default function BulkPayslipsPrint({ payslips, period }) {
                   <tr><td>Absent days</td><td>{c.absentDays}</td></tr>
                   <tr><td>Absence deduction</td><td>− {peso(c.absenceDeduction)}</td></tr>
                   <tr><td>Overtime hours</td><td>{c.overtimeHours}</td></tr>
-                  <tr><td>Overtime pay</td><td>+ {peso(c.overtimePay)}</td></tr>
-                  <tr>
-                    <td>Office incentive{c.officeIncentiveEnabled ? '' : ' (disabled)'}</td>
-                    <td>+ {peso(c.officeAllowance)}</td>
-                  </tr>
-                  <tr>
-                    <td>Mobile incentive{c.mobileIncentiveEnabled ? '' : ' (disabled)'}</td>
-                    <td>+ {peso(c.mobileAllowance)}</td>
-                  </tr>
-                  <tr>
-                    <td>Rest day pay ({c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
-                    <td>+ {peso(c.sundayPay)}</td>
-                  </tr>
-                  {c.reimbursements && c.reimbursements.length > 0 ? (
-                    c.reimbursements.map((r, i) => (
-                      <tr key={`reimb-${i}`}>
-                        <td>Reimbursement / incentive · {r.note}</td>
-                        <td>+ {peso(r.amount)}</td>
-                      </tr>
-                    ))
+                  {/* Money lines render only when they actually move the pay, matching
+                      the on-screen payslip (and the single-payslip PDF export). */}
+                  {hasAmount(c.overtimePay) ? (
+                    <tr><td>Overtime pay</td><td>+ {peso(c.overtimePay)}</td></tr>
                   ) : null}
-                  {c.deductions && c.deductions.length > 0 ? (
-                    c.deductions.map((d, i) => (
-                      <tr key={`ded-${i}`}>
-                        <td>Cash advance / deduction · {d.note}</td>
-                        <td>− {peso(d.amount)}</td>
-                      </tr>
-                    ))
+                  {hasAmount(c.officeAllowance) ? (
+                    <tr>
+                      <td>Office incentive{c.officeIncentiveEnabled ? '' : ' (disabled)'}</td>
+                      <td>+ {peso(c.officeAllowance)}</td>
+                    </tr>
                   ) : null}
+                  {hasAmount(c.mobileAllowance) ? (
+                    <tr>
+                      <td>Mobile incentive{c.mobileIncentiveEnabled ? '' : ' (disabled)'}</td>
+                      <td>+ {peso(c.mobileAllowance)}</td>
+                    </tr>
+                  ) : null}
+                  {hasAmount(c.sundayPay) ? (
+                    <tr>
+                      <td>Rest day pay ({c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
+                      <td>+ {peso(c.sundayPay)}</td>
+                    </tr>
+                  ) : null}
+                  {(c.reimbursements || []).filter((r) => hasAmount(r.amount)).map((r, i) => (
+                    <tr key={`reimb-${i}`}>
+                      <td>Reimbursement / incentive · {r.note}</td>
+                      <td>+ {peso(r.amount)}</td>
+                    </tr>
+                  ))}
+                  {(c.deductions || []).filter((d) => hasAmount(d.amount)).map((d, i) => (
+                    <tr key={`ded-${i}`}>
+                      <td>Cash advance / deduction · {d.note}</td>
+                      <td>− {peso(d.amount)}</td>
+                    </tr>
+                  ))}
                   <tr className="netpay">
                     <td><strong>NET PAY</strong></td>
                     <td><strong>{peso(c.netPay)}</strong></td>

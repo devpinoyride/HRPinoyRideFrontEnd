@@ -48,6 +48,17 @@ export function peso(value) {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', minimumFractionDigits: 2 }).format(Number(value));
 }
 
+// True when a "+ / −" money line actually moves the pay. null, undefined, blank
+// and zero all count as "nothing to show", so those payslip rows are omitted
+// from both the on-screen payslip and its printed/exported PDF. Shared so the
+// screen and the exports can never drift apart.
+export function hasAmount(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string' && value.trim() === '') return false;
+  const n = Number(value);
+  return !Number.isNaN(n) && n !== 0;
+}
+
 const WORKDAY_LABELS = {
   mon_fri: 'Monday – Friday',
   mon_sat: 'Monday – Saturday',

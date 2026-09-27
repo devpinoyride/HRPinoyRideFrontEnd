@@ -1,5 +1,5 @@
 import { forwardRef, useState } from 'react';
-import { StatusBadge, peso, fmtDate, fmtISO, workDayLabel, workDayShortLabel } from './ui.jsx';
+import { StatusBadge, peso, hasAmount, fmtDate, fmtISO, workDayLabel, workDayShortLabel } from './ui.jsx';
 
 function periodLabel(p) {
   if (!p) return '';
@@ -122,60 +122,68 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                       <tr><td>Absence deduction ({c.absentDays} × {peso(c.dailyRate)})</td><td>− {peso(c.absenceDeduction)}</td></tr>
                     )}
                     <tr><td>Overtime hours (approved OT, beyond 8h/day)</td><td>{c.overtimeHours}</td></tr>
-                    <tr>
-                      <td>Overtime pay ({c.overtimeHours} × hourly {peso(c.dailyRate / 8)} × 1.25)</td>
-                      <td>+ {peso(c.overtimePay)}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        Office incentive
-                        {c.officeIncentiveEnabled
-                          ? ` (${peso(c.officeIncentiveRate)} × ${c.officeIncentiveDays} office day${c.officeIncentiveDays === 1 ? '' : 's'})`
-                          : ' (disabled)'}
-                      </td>
-                      <td>+ {peso(c.officeAllowance)}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        Mobile incentive
-                        {c.mobileIncentiveEnabled
-                          ? ` (${peso(c.mobileIncentiveRate)} × ${c.mobileIncentiveWeeks} Sunday${c.mobileIncentiveWeeks === 1 ? '' : 's'} in cutoff)`
-                          : ' (disabled)'}
-                      </td>
-                      <td>+ {peso(c.mobileAllowance)}</td>
-                    </tr>
-                    <tr>
-                      <td>Rest day pay ({peso(c.dailyRate)} × {c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
-                      <td>+ {peso(c.sundayPay)}</td>
-                    </tr>
-                    {c.reimbursements && c.reimbursements.length > 0 ? (
-                      c.reimbursements.map((r, i) => (
-                        <tr key={`reimb-${i}`}>
-                          <td>Reimbursement / incentive · {r.note}</td>
-                          <td>+ {peso(r.amount)}</td>
-                        </tr>
-                      ))
+                    {hasAmount(c.overtimePay) ? (
+                      <tr>
+                        <td>Overtime pay ({c.overtimeHours} × hourly {peso(c.dailyRate / 8)} × 1.25)</td>
+                        <td>+ {peso(c.overtimePay)}</td>
+                      </tr>
                     ) : null}
-                    {c.deductions && c.deductions.length > 0 ? (
-                      c.deductions.map((d, i) => (
-                        <tr key={`ded-${i}`}>
-                          <td>Cash advance / deduction · {d.note}</td>
-                          <td>− {peso(d.amount)}</td>
-                        </tr>
-                      ))
+                    {hasAmount(c.officeAllowance) ? (
+                      <tr>
+                        <td>
+                          Office incentive
+                          {c.officeIncentiveEnabled
+                            ? ` (${peso(c.officeIncentiveRate)} × ${c.officeIncentiveDays} office day${c.officeIncentiveDays === 1 ? '' : 's'})`
+                            : ' (disabled)'}
+                        </td>
+                        <td>+ {peso(c.officeAllowance)}</td>
+                      </tr>
                     ) : null}
-                    <tr>
-                      <td>
-                        Tardiness / undertime
-                        {(c.lateMinutes || c.earlyOutMinutes)
-                          ? ` (${c.lateMinutes} min late + ${c.earlyOutMinutes} min undertime × ${peso(c.minuteRate)}/min)`
-                          : ' (none)'}
-                        {invalidDays.length > 0
-                          ? ` — excludes ${invalidDays.length} invalid entr${invalidDays.length === 1 ? 'y' : 'ies'} pending correction`
-                          : ''}
-                      </td>
-                      <td>− {peso(c.tardinessDeduction)}</td>
-                    </tr>
+                    {hasAmount(c.mobileAllowance) ? (
+                      <tr>
+                        <td>
+                          Mobile incentive
+                          {c.mobileIncentiveEnabled
+                            ? ` (${peso(c.mobileIncentiveRate)} × ${c.mobileIncentiveWeeks} Sunday${c.mobileIncentiveWeeks === 1 ? '' : 's'} in cutoff)`
+                            : ' (disabled)'}
+                        </td>
+                        <td>+ {peso(c.mobileAllowance)}</td>
+                      </tr>
+                    ) : null}
+                    {hasAmount(c.sundayPay) ? (
+                      <tr>
+                        <td>Rest day pay ({peso(c.dailyRate)} × {c.sundayDays} approved rest day{c.sundayDays === 1 ? '' : 's'} worked)</td>
+                        <td>+ {peso(c.sundayPay)}</td>
+                      </tr>
+                    ) : null}
+                    {/* Reimbursements and cash advances: hide individual ₱0.00 lines,
+                        keeping the rest so a mixed list still shows its real entries. */}
+                    {(c.reimbursements || []).filter((r) => hasAmount(r.amount)).map((r, i) => (
+                      <tr key={`reimb-${i}`}>
+                        <td>Reimbursement / incentive · {r.note}</td>
+                        <td>+ {peso(r.amount)}</td>
+                      </tr>
+                    ))}
+                    {(c.deductions || []).filter((d) => hasAmount(d.amount)).map((d, i) => (
+                      <tr key={`ded-${i}`}>
+                        <td>Cash advance / deduction · {d.note}</td>
+                        <td>− {peso(d.amount)}</td>
+                      </tr>
+                    ))}
+                    {hasAmount(c.tardinessDeduction) ? (
+                      <tr>
+                        <td>
+                          Tardiness / undertime
+                          {(c.lateMinutes || c.earlyOutMinutes)
+                            ? ` (${c.lateMinutes} min late + ${c.earlyOutMinutes} min undertime × ${peso(c.minuteRate)}/min)`
+                            : ' (none)'}
+                          {invalidDays.length > 0
+                            ? ` — excludes ${invalidDays.length} invalid entr${invalidDays.length === 1 ? 'y' : 'ies'} pending correction`
+                            : ''}
+                        </td>
+                        <td>− {peso(c.tardinessDeduction)}</td>
+                      </tr>
+                    ) : null}
                     <tr className="netpay">
                       <td><strong>NET PAY</strong></td>
                       <td><strong>{peso(c.netPay)}</strong></td>
