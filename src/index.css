@@ -310,6 +310,51 @@ input:disabled, select:disabled, textarea:disabled {
 .payslip-computation .netpay td { border-top: 2px solid var(--primary); font-size: 1.02rem; }
 .payslip-foot { font-size: .78rem; margin-top: 12px; }
 .cell-invalid { color: var(--danger); font-weight: 600; }
+
+/* ---- Cancel deduction (HR admin only) ---- */
+/* Small inline text button that sits next to a cash advance line. */
+.link-btn {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--pr-orange);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-btn:hover { background: #f5f6f8; }
+.link-btn:focus-visible { outline: 2px solid var(--pr-orange); outline-offset: 1px; }
+
+/* "(₱500.00 cancelled by HR Administrator)" suffix on a partially cancelled line. */
+.ded-cancelled-note { color: var(--muted); font-size: .85em; }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 60;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .28);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal h3 { margin: 0; font-size: 1.05rem; }
+.modal p { margin: 0; font-size: .85rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .badge-present { background: #e7f6ec; color: #177245; }
 .badge-absent { background: #fdeaea; color: #b02a2a; }
 .badge-no_clock_out { background: #fdeaea; color: #b02a2a; }

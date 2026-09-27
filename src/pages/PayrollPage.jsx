@@ -359,6 +359,7 @@ export default function PayrollPage() {
           period={period}
           busy={slipBusy}
           error={slipError}
+          onChanged={() => openPayslip(selectedId)}
         />
       ) : null}
 

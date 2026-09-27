@@ -1,5 +1,7 @@
 import { forwardRef, useState } from 'react';
 import { StatusBadge, peso, hasAmount, fmtDate, fmtISO, workDayLabel, workDayShortLabel } from './ui.jsx';
+import { useAuth } from '../auth/AuthContext.jsx';
+import { api } from '../api/client';
 
 function periodLabel(p) {
   if (!p) return '';
@@ -26,12 +28,67 @@ function printSection(sectionClass) {
  * "My Payslip" page. Organizes the payslip and attendance detail into tabs,
  * each with its own clean PDF export (print-to-PDF).
  */
-const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, error }, ref) {
+const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, error, onChanged }, ref) {
   const [tab, setTab] = useState('payslip');
+  // HR-admin-only: cancel all or part of an approved cash advance / deduction.
+  const { can } = useAuth();
+  const canCancel = can('hr_admin');
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelAmount, setCancelAmount] = useState('');
+  const [cancelNote, setCancelNote] = useState('');
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelError, setCancelError] = useState('');
   const c = payslip?.computation || null;
   // Days with a clock-out earlier than clock-in (negative hours) are invalid
   // and need correction — their tardiness is excluded from the deduction.
   const invalidDays = (payslip?.days || []).filter((d) => d.status === 'present' && d.hours != null && d.hours < 0);
+
+  function openCancel(d) {
+    setCancelTarget(d);
+    // Default to the full remaining amount; HR can lower it for a partial cancel.
+    setCancelAmount(String(d.amount ?? ''));
+    setCancelNote('');
+    setCancelError('');
+  }
+
+  function closeCancel() {
+    if (cancelBusy) return;
+    setCancelTarget(null);
+    setCancelAmount('');
+    setCancelNote('');
+    setCancelError('');
+  }
+
+  async function confirmCancel() {
+    if (!cancelTarget) return;
+    const amount = Number(cancelAmount);
+    const remaining = Number(cancelTarget.amount ?? 0);
+
+    // Client-side mirror of the server rules; the API re-validates anyway.
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setCancelError('Enter an amount greater than zero.');
+      return;
+    }
+    if (amount > remaining) {
+      setCancelError(`You can cancel at most ${peso(remaining)} of this deduction.`);
+      return;
+    }
+
+    setCancelBusy(true);
+    setCancelError('');
+    try {
+      await api.cancelDeduction(cancelTarget.id, amount, cancelNote.trim() || undefined);
+      setCancelTarget(null);
+      setCancelAmount('');
+      setCancelNote('');
+      // Net pay and the deduction line change server-side; refetch the payslip.
+      if (onChanged) await onChanged();
+    } catch (err) {
+      setCancelError(err.message || 'Could not cancel this deduction.');
+    } finally {
+      setCancelBusy(false);
+    }
+  }
 
   return (
     <section className="card payslip-card" ref={ref}>
@@ -172,9 +229,29 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                         <td>+ {peso(r.amount)}</td>
                       </tr>
                     ))}
+                    {/* Cash advances: `amount` is the REMAINING figure, so a fully
+                        cancelled line is already hidden by hasAmount. The Cancel
+                        control is HR-admin only and never prints. */}
                     {(c.deductions || []).filter((d) => hasAmount(d.amount)).map((d, i) => (
-                      <tr key={`ded-${i}`}>
-                        <td>Cash advance / deduction · {d.note}</td>
+                      <tr key={d.id ?? `ded-${i}`}>
+                        <td>
+                          Cash advance / deduction · {d.note}
+                          {d.cancelledAmount ? (
+                            <span className="ded-cancelled-note">
+                              {' '}({peso(d.cancelledAmount)} cancelled{d.cancelledByName ? ` by ${d.cancelledByName}` : ''})
+                            </span>
+                          ) : null}
+                          {canCancel ? (
+                            <button
+                              type="button"
+                              className="link-btn no-print"
+                              onClick={() => openCancel(d)}
+                              title={`Cancel part or all of this deduction (${peso(d.amount)} remaining)`}
+                            >
+                              Cancel
+                            </button>
+                          ) : null}
+                        </td>
                         <td>− {peso(d.amount)}</td>
                       </tr>
                     ))}
@@ -203,6 +280,57 @@ const PayslipView = forwardRef(function PayslipView({ payslip, period, busy, err
                   No salary set for this staff member yet — set it on the Staff page (Edit → Basic salary, or Daily rate + Salary mode = Daily) to compute pay.
                 </div>
               )}
+
+              {/* HR-admin-only confirm step: nothing is applied without it. */}
+              {cancelTarget ? (
+                <div className="modal-backdrop no-print" role="dialog" aria-modal="true" aria-label="Cancel deduction">
+                  <div className="modal">
+                    <h3>Cancel deduction</h3>
+                    <p className="muted">
+                      Cash advance / deduction · {cancelTarget.note}
+                      <br />
+                      Approved {peso(cancelTarget.originalAmount ?? cancelTarget.amount)} · remaining{' '}
+                      <strong>{peso(cancelTarget.amount)}</strong>
+                    </p>
+
+                    <label className="field">
+                      <span className="field-label">Amount to cancel (₱)</span>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={cancelAmount}
+                        onChange={(e) => setCancelAmount(e.target.value)}
+                        autoFocus
+                      />
+                      <span className="field-hint">
+                        Full or partial. Enter {peso(cancelTarget.amount)} to cancel the whole remaining amount.
+                      </span>
+                    </label>
+
+                    <label className="field">
+                      <span className="field-label">Reason for cancellation (optional)</span>
+                      <textarea
+                        rows={2}
+                        value={cancelNote}
+                        onChange={(e) => setCancelNote(e.target.value)}
+                        placeholder="e.g. Deduction applied in error"
+                      />
+                    </label>
+
+                    {cancelError ? <div className="alert alert-error">{cancelError}</div> : null}
+
+                    <div className="modal-actions">
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={closeCancel} disabled={cancelBusy}>
+                        Back
+                      </button>
+                      <button type="button" className="btn btn-primary btn-sm" onClick={confirmCancel} disabled={cancelBusy}>
+                        {cancelBusy ? 'Cancelling…' : 'Confirm cancellation'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               <p className="muted payslip-foot">
                 System-computed from time logs ({workDayShortLabel(c && c.workDayPattern)} workdays, future days excluded, approved OT beyond 8h/day paid at +25%) ·

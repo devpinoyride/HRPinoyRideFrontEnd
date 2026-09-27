@@ -129,6 +129,8 @@ export const api = {
   pendingDeductions: () => request('/api/deductions/pending'),
   approveDeduction: (id, notes) => request(`/api/deductions/${id}/approve`, { method: 'POST', body: { notes } }),
   rejectDeduction: (id, notes) => request(`/api/deductions/${id}/reject`, { method: 'POST', body: { notes } }),
+  // HR admin only: cancel all or part of an approved deduction.
+  cancelDeduction: (id, amount, note) => request(`/api/deductions/${id}/cancel`, { method: 'POST', body: { amount, note } }),
 
   approvals: () => request('/api/approvals'),
   approve: (id, notes) => request(`/api/approvals/${id}/approve`, { method: 'POST', body: { notes } }),
