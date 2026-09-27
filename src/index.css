@@ -249,6 +249,14 @@ input:disabled, select:disabled, textarea:disabled {
 .badge-self_logged { background: #ede9fe; color: #5b21b6; }
 .badge-adjusted { background: #cffafe; color: #155e75; }
 .badge-orange { background: #ffedd5; color: #9a3412; }
+
+/* Salary-mode badges (Payroll summary "Mode" column). One colour per mode so
+   Fixed / Daily / Monthly are distinguishable at a glance; Fixed and Daily used
+   to share .badge-orange. Shape/size/font come from .badge — only colours here.
+   Text colours are 800-level on 100-level backgrounds (>= 6.3:1 contrast). */
+.badge-mode-fixed { background: #dbeafe; color: #1e40af; }    /* blue   */
+.badge-mode-daily { background: #fef3c7; color: #92400e; }    /* amber  */
+.badge-mode-monthly { background: #f3e8ff; color: #6b21a8; }  /* purple */
 /* ---------- Tabs ---------- */
 .tabs {
   display: flex; gap: 4px; flex-wrap: wrap;

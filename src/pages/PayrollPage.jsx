@@ -320,11 +320,11 @@ export default function PayrollPage() {
                     <td>{r.fullName}</td>
                     <td>
                       {r.salaryMode === 'daily' ? (
-                        <span className="badge badge-orange">Daily</span>
+                        <span className="badge badge-mode-daily">Daily</span>
                       ) : r.fixedSalary ? (
-                        <span className="badge badge-orange">Fixed</span>
+                        <span className="badge badge-mode-fixed">Fixed</span>
                       ) : (
-                        <span className="badge">Monthly</span>
+                        <span className="badge badge-mode-monthly">Monthly</span>
                       )}
                     </td>
                     <td className="num">{r.basicSalary != null ? peso(r.basicSalary) : '—'}</td>
