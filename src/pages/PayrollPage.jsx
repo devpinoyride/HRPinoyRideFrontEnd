@@ -241,7 +241,7 @@ export default function PayrollPage() {
             {search.trim() ? ` · "${search.trim()}" (${visibleRows.length})` : ` (${rows.length})`}
             {finalized ? <span className="badge badge-active staff-flag">Paid / Finalized</span> : null}
           </h2>
-          <div className="section-search">
+          <div className="summary-tools">
             <div className="payroll-total" title="Net pay of all staff in this cutoff (ignores the search filter)">
               <span className="payroll-total-label">Grand total</span>
               <span className="payroll-total-value">{peso(grandTotal)}</span>

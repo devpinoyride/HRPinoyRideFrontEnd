@@ -121,15 +121,21 @@ h2 { font-size: 1.1rem; }
 }
 .section-head h2 { margin: 0; }
 .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-/* Keeps the payroll grand total box paired with (and left of) the search
-   input; on narrow screens the box wraps to its own line instead of
-   squeezing the input. */
-.section-search { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.section-search input {
+/* Keeps the grand total box on the same row as (and immediately left of)
+   the search input; they only stack on small screens (see the media query). */
+.summary-tools { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.summary-tools input {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  width: 280px;
   min-width: 220px;
+}
+
+/* Small screens: let the grand total box and search input stack instead of
+   squeezing each other; desktop keeps them side by side on the heading row. */
+@media (max-width: 700px) {
+  .summary-tools { flex-wrap: wrap; }
 }
 
 /* Net-pay grand total in the payroll summary header. Computed from the full
