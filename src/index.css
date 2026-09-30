@@ -121,12 +121,30 @@ h2 { font-size: 1.1rem; }
 }
 .section-head h2 { margin: 0; }
 .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Keeps the payroll grand total box paired with (and left of) the search
+   input; on narrow screens the box wraps to its own line instead of
+   squeezing the input. */
+.section-search { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .section-search input {
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   min-width: 220px;
 }
+
+/* Net-pay grand total in the payroll summary header. Computed from the full
+   result set (never the search filter); wraps to its own line on narrow screens. */
+.payroll-total {
+  display: flex; flex-direction: column; gap: 1px;
+  background: #fff7e6; border: 1px solid var(--pr-orange);
+  border-radius: var(--radius); padding: 5px 12px; line-height: 1.25;
+  flex: 0 0 auto; white-space: nowrap;
+}
+.payroll-total-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: #92400e;
+}
+.payroll-total-value { font-size: 0.95rem; font-weight: 700; color: var(--pr-dark); }
 
 /* Bulk print containers are hidden on screen; shown only during their print. */
 .bulk-print { display: none; }

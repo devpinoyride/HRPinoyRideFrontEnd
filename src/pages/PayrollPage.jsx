@@ -162,6 +162,14 @@ export default function PayrollPage() {
     );
   })();
 
+  // Grand total of net pay across the whole payroll result — computed from the
+  // same rows the table renders, never from the search-filtered view. Rows
+  // without a computation (shown as "—") are skipped; zero rows → ₱0.00.
+  const grandTotal = rows.reduce((sum, r) => {
+    const n = Number(r.netPay);
+    return r.netPay != null && !Number.isNaN(n) ? sum + n : sum;
+  }, 0);
+
   const openPayslip = useCallback(async (staffId) => {
     const [y, m] = month.split('-').map(Number);
     setSelectedId(staffId);
@@ -234,6 +242,10 @@ export default function PayrollPage() {
             {finalized ? <span className="badge badge-active staff-flag">Paid / Finalized</span> : null}
           </h2>
           <div className="section-search">
+            <div className="payroll-total" title="Net pay of all staff in this cutoff (ignores the search filter)">
+              <span className="payroll-total-label">Grand total</span>
+              <span className="payroll-total-value">{peso(grandTotal)}</span>
+            </div>
             <input
               type="search"
               placeholder="Search staff by name, department, position…"
